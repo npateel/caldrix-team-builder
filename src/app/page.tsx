@@ -46,7 +46,7 @@ export default async function Home() {
               <li key={team.id}>
                 <Link
                   href={`/teams/${team.id}`}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded border border-black/10 p-3 hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
+                  className="flex flex-col gap-3 rounded border border-black/10 p-3 hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:bg-white/5"
                 >
                   <div className="min-w-0">
                     <p className="truncate font-medium">{team.name}</p>

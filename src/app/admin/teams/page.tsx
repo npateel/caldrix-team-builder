@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { AdminDeleteButton } from "@/components/admin-delete-button";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { db } from "@/db";
 import { teams, users } from "@/db/schema";
 import { getRosters } from "@/lib/team-roster";
@@ -34,7 +34,7 @@ export default async function AdminTeamsPage() {
               <td className="py-2 pr-4">{(rosters.get(team.id) ?? []).length} / 6</td>
               <td className="py-2 pr-4">{team.updatedAt.toLocaleDateString()}</td>
               <td className="py-2">
-                <AdminDeleteButton url={`/api/admin/teams/${team.id}`} confirmMessage={`Delete team "${team.name}"?`} />
+                <ConfirmDeleteButton url={`/api/admin/teams/${team.id}`} confirmMessage={`Delete team "${team.name}"?`} />
               </td>
             </tr>
           ))}
