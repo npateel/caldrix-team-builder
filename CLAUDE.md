@@ -42,3 +42,5 @@ Base URL: `https://pokeapi.co/api/v2/`
 - Testing framework.
 - DB schema.
 - Counter-team algorithm details.
+
+@AGENTS.md
