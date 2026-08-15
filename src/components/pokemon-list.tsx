@@ -12,11 +12,11 @@ export type SortDirection = "asc" | "desc";
 
 const STAT_COLUMNS: { key: StatSortKey; label: string }[] = [
   { key: "hp", label: "HP" },
-  { key: "attack", label: "Atk" },
-  { key: "defense", label: "Def" },
-  { key: "specialAttack", label: "SpA" },
-  { key: "specialDefense", label: "SpD" },
-  { key: "speed", label: "Spe" },
+  { key: "attack", label: "Attack" },
+  { key: "defense", label: "Defense" },
+  { key: "specialAttack", label: "Sp. Atk" },
+  { key: "specialDefense", label: "Sp. Def" },
+  { key: "speed", label: "Speed" },
   { key: "total", label: "Total" },
 ];
 
@@ -24,10 +24,10 @@ const STAT_COLUMNS: { key: StatSortKey; label: string }[] = [
 // (name/types merged into one cell, no id -- narrow windows/phones). Which
 // one renders is driven by measured container width, not a CSS breakpoint,
 // since it also changes cell structure, not just column widths.
-const FULL_TEMPLATE = "40px 56px 140px 140px repeat(7, 56px)";
-const COMPACT_TEMPLATE = "40px 160px repeat(7, 56px)";
-const FULL_TABLE_MAX_WIDTH = 900;
-const COMPACT_TABLE_WIDTH = 660;
+const FULL_TEMPLATE = "40px 56px 140px 140px repeat(7, 64px)";
+const COMPACT_TEMPLATE = "40px 160px repeat(7, 64px)";
+export const FULL_TABLE_MAX_WIDTH = 920;
+const COMPACT_TABLE_WIDTH = 720;
 const LAYOUT_BREAKPOINT = 860;
 const ROW_HEIGHT_ESTIMATE = 56;
 
@@ -40,11 +40,15 @@ export function PokemonList({
   sortKey,
   sortDirection,
   onSort,
+  onSelect,
+  selectedIds,
 }: {
   pokemon: PokemonCardData[];
   sortKey: SortKey | null;
   sortDirection: SortDirection;
   onSort: (key: SortKey) => void;
+  onSelect?: (id: number) => void;
+  selectedIds?: Set<number>;
 }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -114,10 +118,26 @@ export function PokemonList({
             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
               const p = pokemon[virtualRow.index];
               const boldStats = highestStatKeys(p);
+              const selected = selectedIds?.has(p.id);
               return (
                 <div
                   key={p.id}
-                  className="grid items-center gap-2 border-b border-black/5 text-sm dark:border-white/5"
+                  role={onSelect ? "button" : undefined}
+                  tabIndex={onSelect ? 0 : undefined}
+                  onClick={onSelect ? () => onSelect(p.id) : undefined}
+                  onKeyDown={
+                    onSelect
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onSelect(p.id);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={`grid items-center gap-2 border-b border-black/5 text-sm dark:border-white/5 ${
+                    onSelect ? "cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" : ""
+                  } ${selected ? "bg-emerald-50 dark:bg-emerald-950/30" : ""}`}
                   style={{
                     position: "absolute",
                     top: 0,
@@ -128,12 +148,15 @@ export function PokemonList({
                     gridTemplateColumns: template,
                   }}
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {p.spriteUrl ? (
-                    <img src={p.spriteUrl} alt={p.name} width={32} height={32} loading="lazy" />
-                  ) : (
-                    <span />
-                  )}
+                  <span className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    {p.spriteUrl ? <img src={p.spriteUrl} alt={p.name} width={32} height={32} loading="lazy" /> : null}
+                    {selected ? (
+                      <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500 text-[9px] text-white">
+                        ✓
+                      </span>
+                    ) : null}
+                  </span>
                   {layout === "full" && <span className="text-zinc-400">{p.id}</span>}
                   {layout === "full" ? (
                     <span className="truncate capitalize">{p.name}</span>
