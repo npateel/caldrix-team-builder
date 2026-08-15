@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export function AdminDeleteButton({ url, confirmMessage }: { url: string; confirmMessage: string }) {
+export function ConfirmDeleteButton({ url, confirmMessage }: { url: string; confirmMessage: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
