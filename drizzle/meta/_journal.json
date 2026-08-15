@@ -22,6 +22,20 @@
       "when": 1786812774375,
       "tag": "0002_spotty_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786819053163,
+      "tag": "0003_jazzy_arclight",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786820939749,
+      "tag": "0004_new_silver_sable",
+      "breakpoints": true
     }
   ]
 }

@@ -13,3 +13,58 @@
   cached
 - `npm run db:seed` -- reads that cache and upserts it into the database
 - `npm run dev` -- start the Next.js dev server
+- `npm test` -- run the route/unit tests (Vitest; DB and auth are mocked, no
+  live database needed)
+
+## OAuth (GitHub + Google)
+
+Requires these vars in `.env.local` (see adr-005):
+
+- `AUTH_SECRET` -- any random string, e.g. `openssl rand -base64 33`
+- `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` -- from a GitHub OAuth App
+  ([github.com/settings/developers](https://github.com/settings/developers)).
+  Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
+  (and your deployed URL's equivalent)
+- `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` -- from a Google OAuth Client
+  ([console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials)).
+  Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+  (and your deployed URL's equivalent)
+
+## Admin portal (`/admin`)
+
+Gated by `users.isAdmin` (see adr-006) -- there's no self-serve way to
+become an admin. To grant yourself access: sign in once via OAuth so your
+`users` row exists, then flip the column by hand, e.g. via `npm run
+db:studio` or:
+
+```sql
+update users set is_admin = true where email = 'you@example.com';
+```
+
+The "Admin" link only shows up in the nav once your account has it.
+
+### Task 2 change-detection scan
+
+`/admin/changes` shows the `changes` log and a "Run scan now" button that
+hits `/api/cron/scan-changes` -- the same route Vercel Cron calls on the
+schedule in `vercel.json` (hourly). Only pokemon currently on at least one
+team are checked against live PokéAPI data (see adr-006 for why).
+
+- `CRON_SECRET` -- any random string, set in your Vercel project's env vars.
+  Vercel Cron sends it as `Authorization: Bearer $CRON_SECRET`; not needed
+  locally since the admin "Run scan now" button authenticates via your
+  admin session instead.
+
+### Daily full cache reseed
+
+`/api/cron/reseed` refetches the *entire* pokemon/moves cache from PokéAPI
+(not just team pokemon like the scan job above) and upserts it -- see
+adr-007. Vercel Cron runs it daily at 3am (`vercel.json`); `/admin/pokemon`
+also has a "Reseed cache now" button for triggering it manually. Same
+`CRON_SECRET`/admin-session auth as the scan route.
+
+This does ~2200 PokéAPI calls and realistically takes a minute or more, so
+`export const maxDuration = 300` is set on the route -- **this needs a
+Vercel plan whose function duration ceiling actually covers that** (Hobby's
+default won't). If it times out in practice, see adr-007's alternatives
+(a scheduled CI job has no such limit).

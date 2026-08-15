@@ -5,14 +5,69 @@ import {
   text,
   integer,
   smallint,
+  boolean,
   timestamp,
   primaryKey,
 } from "drizzle-orm/pg-core";
 
+// name/email/emailVerified/image are unused for anonymous (cookie-based)
+// users -- populated once someone signs in via OAuth (see src/auth.ts).
+// isAdmin gates /admin (see adr-006) -- no self-serve way to set it, flip it
+// by hand (db:studio or a one-off update) for whoever needs access.
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name"),
+  email: text("email").unique(),
+  emailVerified: timestamp("email_verified", { withTimezone: true }),
+  image: text("image"),
+  isAdmin: boolean("is_admin").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Schema below matches what @auth/drizzle-adapter expects to find on tables
+// named users/accounts/sessions/verificationTokens. Session strategy is JWT
+// (see src/auth.ts), so `sessions` isn't actively read/written, but the
+// adapter still expects the table to exist.
+// @auth/drizzle-adapter's Postgres accounts table type expects these exact
+// (snake_case) object keys, not just matching db column names -- it reads
+// e.g. account.refresh_token, not account.refreshToken.
+export const accounts = pgTable(
+  "accounts",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("provider_account_id").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (table) => [primaryKey({ columns: [table.provider, table.providerAccountId] })],
+);
+
+export const sessions = pgTable("sessions", {
+  sessionToken: text("session_token").primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { withTimezone: true }).notNull(),
+});
+
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { withTimezone: true }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.identifier, table.token] })],
+);
 
 // Primary key is the PokéAPI id itself (not a generated uuid) -- these rows
 // are a cache of an external source of truth, not app-owned entities.

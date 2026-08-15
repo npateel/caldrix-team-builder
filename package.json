@@ -15,9 +15,12 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.7.4",
     "@neondatabase/serverless": "^1.1.0",
+    "@tanstack/react-virtual": "^3.13.0",
     "drizzle-orm": "^0.45.2",
     "next": "16.3.1",
+    "next-auth": "5.0.0-beta.25",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "ws": "^8.18.0"
@@ -38,5 +41,10 @@
     "tsx": "^4.19.2",
     "typescript": "^5",
     "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "next-auth": {
+      "next": "$next"
+    }
   }
 }

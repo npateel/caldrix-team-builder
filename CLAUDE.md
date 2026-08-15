@@ -38,9 +38,21 @@ Base URL: `https://pokeapi.co/api/v2/`
 - `GET /pokemon` — list
 - `GET /pokemon/{id}` — `name`, `types[].type.name`, `stats[]`, `sprites.front_default`
 
-## Open items (not yet decided)
-- Testing framework.
-- DB schema.
-- Counter-team algorithm details.
+## Decided (previously open items)
+- Testing framework: Vitest, with manual `__mocks__` for `@/db` and
+  `@/lib/user` so route tests don't need a live database.
+- DB schema: see adr-004 (core), adr-005 (OAuth tables), adr-006 (admin +
+  Task 2 scan), adr-007 (daily reseed).
+- Counter-team algorithm: greedy, slot-0 pinned to the enemy's first
+  Pokémon, remaining slots avoid stacking shared weaknesses. See
+  `src/lib/counter-team.ts`.
+
+## Open items
+- Task 2 says a user should see a frontend alert when their own team's
+  Pokémon changed in the last 7 days. The scan job and `changes` log exist
+  (adr-006) and are visible at `/admin/changes`, but there's no user-facing
+  surface for this yet -- a regular (non-admin) user currently has no way to
+  see that a Pokémon on their team changed. Still needs building before
+  Task 2 is actually complete.
 
 @AGENTS.md

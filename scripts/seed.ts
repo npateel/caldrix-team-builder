@@ -5,22 +5,11 @@ import path from "node:path";
 import { sql } from "drizzle-orm";
 import { db } from "../src/db";
 import { pokemon, moves, pokemonMoves } from "../src/db/schema";
+import { transformMove, transformPokemon } from "../src/lib/pokeapi-transform";
 
 const POKEMON_FILE = path.join("scripts", "data", "pokemon.jsonl");
 const MOVES_FILE = path.join("scripts", "data", "moves.jsonl");
 const BATCH_SIZE = 500;
-const VALID_DAMAGE_CLASSES = new Set(["status", "physical", "special"]);
-
-type PokemonRow = typeof pokemon.$inferInsert;
-type MoveRow = typeof moves.$inferInsert;
-
-type PokemonStat = { base_stat: number; stat: { name: string } };
-
-function statValue(stats: PokemonStat[], name: string): number {
-  const entry = stats.find((s) => s.stat.name === name);
-  if (!entry) throw new Error(`Missing stat "${name}"`);
-  return entry.base_stat;
-}
 
 function readJsonl(file: string): any[] {
   return fs
@@ -37,20 +26,7 @@ function chunk<T>(items: T[], size: number): T[][] {
 }
 
 async function seedPokemon() {
-  const rows: PokemonRow[] = readJsonl(POKEMON_FILE).map((d) => ({
-    id: d.id as number,
-    name: d.name as string,
-    spriteUrl: d.sprites?.front_default ?? null,
-    types: [...d.types]
-      .sort((a, b) => a.slot - b.slot)
-      .map((t) => t.type.name as PokemonRow["types"][number]),
-    hp: statValue(d.stats, "hp"),
-    attack: statValue(d.stats, "attack"),
-    defense: statValue(d.stats, "defense"),
-    specialAttack: statValue(d.stats, "special-attack"),
-    specialDefense: statValue(d.stats, "special-defense"),
-    speed: statValue(d.stats, "speed"),
-  }));
+  const rows = readJsonl(POKEMON_FILE).map(transformPokemon);
 
   for (const batch of chunk(rows, BATCH_SIZE)) {
     await db
@@ -79,21 +55,13 @@ async function seedPokemon() {
 // referenced on each cached pokemon file to the ids we just seeded.
 async function seedMoves(): Promise<Map<string, number>> {
   let skipped = 0;
-  const rows = readJsonl(MOVES_FILE).flatMap((d): MoveRow[] => {
-    const damageClass = d.damage_class?.name;
-    if (!d.type?.name || !VALID_DAMAGE_CLASSES.has(damageClass)) {
+  const rows = readJsonl(MOVES_FILE).flatMap((d) => {
+    const move = transformMove(d);
+    if (!move) {
       skipped++;
       return [];
     }
-    return [
-      {
-        id: d.id as number,
-        name: d.name as string,
-        type: d.type.name as MoveRow["type"],
-        power: d.power as number | null,
-        damageClass: damageClass as MoveRow["damageClass"],
-      },
-    ];
+    return [move];
   });
 
   for (const batch of chunk(rows, BATCH_SIZE)) {
