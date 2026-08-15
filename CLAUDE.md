@@ -29,7 +29,8 @@ prefer small diffs, clarify assumptions before acting, and keep communication te
 ## Stack (decided)
 - Next.js (App Router, TypeScript) — single app for frontend + API routes.
 - Deployed on Vercel (project `caldrix-team-builder` already linked).
-- Supabase (Postgres) for storage.
+- Neon (Postgres) for storage, via Vercel's native integration.
+- Drizzle ORM for schema + migrations.
 - Vercel Cron → API route for the Task 2 scan job.
 
 ## PokéAPI
