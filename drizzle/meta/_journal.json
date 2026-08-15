@@ -15,6 +15,13 @@
       "when": 1786810283031,
       "tag": "0001_magenta_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786812774375,
+      "tag": "0002_spotty_power_man",
+      "breakpoints": true
     }
   ]
 }

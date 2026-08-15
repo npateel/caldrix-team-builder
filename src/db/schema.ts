@@ -20,7 +20,7 @@ export const users = pgTable("users", {
 export const typeEnum = pgEnum("type_enum", [
   "normal", "fighting", "flying", "poison", "ground",
   "rock", "bug", "ghost", "steel", "fire", "water", "grass", "electric",
-  "psychic", "ice", "dragon", "dark", "fairy", "stellar", "unknown"
+  "psychic", "ice", "dragon", "dark", "fairy", "stellar", "unknown", "shadow"
 ])
 
 export const pokemon = pgTable("pokemon", {
