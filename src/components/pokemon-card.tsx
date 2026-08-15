@@ -24,11 +24,43 @@ const STATS: { key: StatKey; label: string }[] = [
   { key: "speed", label: "Spe" },
 ];
 
-export function PokemonCard({ pokemon }: { pokemon: PokemonCardData }) {
+export function PokemonCard({
+  pokemon,
+  onClick,
+  selected,
+}: {
+  pokemon: PokemonCardData;
+  onClick?: () => void;
+  selected?: boolean;
+}) {
   const boldStats = highestStatKeys(pokemon);
 
   return (
-    <div className="flex h-full flex-col items-center gap-2 rounded-lg border border-black/10 bg-white p-3 dark:border-white/10 dark:bg-zinc-900">
+    <div
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={
+        onClick
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+      className={`relative flex h-full w-full flex-col items-center gap-2 rounded-lg border p-3 text-left ${
+        selected
+          ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950/30"
+          : "border-black/10 bg-white dark:border-white/10 dark:bg-zinc-900"
+      } ${onClick ? "cursor-pointer hover:border-black/30 dark:hover:border-white/30" : ""}`}
+    >
+      {selected ? (
+        <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs text-white">
+          ✓
+        </span>
+      ) : null}
       <span className="self-start text-xs text-zinc-400">#{pokemon.id}</span>
       {pokemon.spriteUrl ? (
         // Sprites come from an external host and are tiny/low-volume, so a
@@ -54,7 +86,7 @@ export function PokemonCard({ pokemon }: { pokemon: PokemonCardData }) {
       <dl className="grid w-full grid-cols-3 gap-x-2 gap-y-1.5 text-[10px] text-zinc-500 dark:text-zinc-400">
         {STATS.map(({ key, label }) => (
           <div key={key} className="flex items-center justify-between">
-            <dt>{label}</dt>
+            <dt className="uppercase">{label}</dt>
             <dd
               className={
                 boldStats.has(key)
