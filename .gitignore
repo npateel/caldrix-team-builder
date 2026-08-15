@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude code -- personal/local overrides, not shared project settings
+.claude/settings.local.json

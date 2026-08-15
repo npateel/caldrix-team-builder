@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/scan-changes",
+      "schedule": "5 3 * * *"
+    },
+    {
+      "path": "/api/cron/reseed",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

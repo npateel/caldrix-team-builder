@@ -5,7 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import cliProgress from "cli-progress";
-import { fetchJson, idFromUrl, pMap } from "./lib/http";
+import { fetchJson, idFromUrl, pMap } from "../src/lib/http";
 
 const BASE = "https://pokeapi.co/api/v2";
 const CONCURRENCY = 8;
