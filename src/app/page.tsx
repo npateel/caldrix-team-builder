@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { SignInButtons } from "@/components/auth-nav";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { CreateTeamButton } from "@/components/create-team-button";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
@@ -43,7 +44,13 @@ export default async function Home() {
           {userTeams.map((team) => {
             const roster = rosters.get(team.id) ?? [];
             return (
-              <li key={team.id}>
+              <li key={team.id} className="relative">
+                <div className="absolute right-2 top-2 z-10 rounded bg-white/90 px-1.5 py-1 shadow-sm dark:bg-zinc-900/90">
+                  <ConfirmDeleteButton
+                    url={`/api/teams/${team.id}`}
+                    confirmMessage={`Delete "${team.name}"? This can't be undone.`}
+                  />
+                </div>
                 <Link
                   href={`/teams/${team.id}`}
                   className="flex flex-col gap-3 rounded border border-black/10 p-3 hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:bg-white/5"
@@ -55,7 +62,7 @@ export default async function Home() {
                     </p>
                   </div>
                   {roster.length > 0 ? (
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="mr-8 flex flex-wrap items-center gap-2">
                       {roster.map((entry) =>
                         entry.pokemon.spriteUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
