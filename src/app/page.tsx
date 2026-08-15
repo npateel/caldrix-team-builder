@@ -46,14 +46,32 @@ export default async function Home() {
               <li key={team.id}>
                 <Link
                   href={`/teams/${team.id}`}
-                  className="flex items-center justify-between rounded border border-black/10 p-3 hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded border border-black/10 p-3 hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
                 >
-                  <div>
-                    <p className="font-medium">{team.name}</p>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium">{team.name}</p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {roster.length} pokémon · updated {team.updatedAt.toLocaleDateString()}
                     </p>
                   </div>
+                  {roster.length > 0 ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {roster.map((entry) =>
+                        entry.pokemon.spriteUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            key={entry.pokemon.id}
+                            src={entry.pokemon.spriteUrl}
+                            alt={entry.pokemon.name}
+                            width={56}
+                            height={56}
+                          />
+                        ) : (
+                          <div key={entry.pokemon.id} className="h-14 w-14" />
+                        ),
+                      )}
+                    </div>
+                  ) : null}
                 </Link>
               </li>
             );
