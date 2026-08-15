@@ -8,6 +8,13 @@
       "when": 1786765843705,
       "tag": "0000_fine_swarm",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786810283031,
+      "tag": "0001_magenta_franklin_storm",
+      "breakpoints": true
     }
   ]
 }
