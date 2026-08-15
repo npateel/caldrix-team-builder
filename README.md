@@ -8,3 +8,4 @@
   `scripts/data/*.jsonl` (gitignored, not checked in -- run this once per
   clone/environment; it's cached locally afterward and safe to rerun)
 - `npm run db:seed` -- reads that cache and upserts it into the database
+- `npm run dev` -- start the Next.js dev server
