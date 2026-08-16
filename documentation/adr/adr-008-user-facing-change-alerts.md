@@ -89,6 +89,30 @@ team-pokemon scope as scan-changes.ts (adr-006), reusing the fresh data
 reseed already fetched rather than making its own PokéAPI calls. Both jobs
 now agree: whichever one happens to run first catches the change.
 
+## Update: alerts weren't scoped to when the pokemon actually joined the team
+
+Found separately: `getRecentTeamChanges` only checked whether a pokemon
+was *currently* on one of the user's teams and whether the change was
+detected in the last 7 days -- not whether the pokemon was already on
+that team *when the change happened*. So creating a new team and adding a
+pokemon someone else had owned (and that PokéAPI had changed) a few days
+earlier would show an alert for a change the user never actually saw
+happen on their own roster.
+
+Fix: added `team_pokemon.added_at` (migration `0005`), stamped `now()` on
+insert. The tricky part is that the roster PUT route always does a full
+delete-and-reinsert of a team's `team_pokemon` rows (see the route's own
+comment for why), so naively inserting with a fresh `defaultNow()` would
+reset every pokemon's `addedAt` on *any* roster edit, including a plain
+reorder. `buildRosterRows` (`src/server/team-roster.ts`) fixes that: it
+reads each pokemon's existing `addedAt` before the delete and carries it
+forward for anything still on the roster, only stamping `now()` for a
+pokemonId that wasn't there before. `getRecentTeamChanges` then adds
+`changes.detectedAt >= team_pokemon.added_at` to its `WHERE` clause.
+Existing rows before the migration all get `addedAt = now()` at migration
+time (no way to know their true historical add time), which is a one-time
+imprecision for pre-existing rosters, not an ongoing one.
+
 ## Alternatives
 
 1. Insert a fabricated row directly into `changes` for the demo, instead
@@ -113,3 +137,9 @@ now agree: whichever one happens to run first catches the change.
    effect -- "this is different from what you last saw" -- is what
    actually matters, and showing a value that round-tripped back to
    itself as a "change" would be actively misleading.
+5. Use `teams.updatedAt` (already bumped on every roster PUT) instead of a
+   new per-pokemon `added_at` column. No migration needed, but it's the
+   wrong granularity -- it's team-wide, so removing one pokemon would
+   bump it and make every *other* pokemon on that team look freshly
+   added too, suppressing alerts for changes to pokemon that had been on
+   the roster for months.

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/db");
 
 import { push, reset } from "@/db";
-import { getRoster, getRosters } from "./team-roster";
+import { buildRosterRows, getRoster, getRosters } from "./team-roster";
 
 beforeEach(() => reset());
 
@@ -36,5 +36,39 @@ describe("getRoster", () => {
     push([]);
 
     expect(await getRoster("missing")).toEqual([]);
+  });
+});
+
+describe("buildRosterRows", () => {
+  const now = new Date("2026-01-10");
+
+  it("stamps a brand-new pokemon with now", () => {
+    const rows = buildRosterRows("t1", [1], [], now);
+
+    expect(rows).toEqual([{ teamId: "t1", pokemonId: 1, position: 0, addedAt: now }]);
+  });
+
+  it("preserves addedAt for a pokemon that was already on the roster", () => {
+    const addedAt = new Date("2026-01-01");
+    const rows = buildRosterRows("t1", [1], [{ pokemonId: 1, addedAt }], now);
+
+    expect(rows).toEqual([{ teamId: "t1", pokemonId: 1, position: 0, addedAt }]);
+  });
+
+  it("mixes preserved and new addedAt within the same roster, positions by array order", () => {
+    const addedAt = new Date("2026-01-01");
+    const rows = buildRosterRows("t1", [2, 1], [{ pokemonId: 1, addedAt }], now);
+
+    expect(rows).toEqual([
+      { teamId: "t1", pokemonId: 2, position: 0, addedAt: now },
+      { teamId: "t1", pokemonId: 1, position: 1, addedAt },
+    ]);
+  });
+
+  it("drops a removed pokemon's addedAt -- re-adding it later counts as new", () => {
+    const oldAddedAt = new Date("2026-01-01");
+    const rows = buildRosterRows("t1", [1], [{ pokemonId: 2, addedAt: oldAddedAt }], now);
+
+    expect(rows).toEqual([{ teamId: "t1", pokemonId: 1, position: 0, addedAt: now }]);
   });
 });

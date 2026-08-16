@@ -138,6 +138,12 @@ export const teamPokemon = pgTable(
       .notNull()
       .references(() => pokemon.id),
     position: smallint("position").notNull(),
+    // When this pokemon joined *this* team's roster -- not touched by
+    // reorders, and preserved (not reset) across a PUT that keeps the
+    // pokemon on the roster. Used to scope Task 2's change alerts to
+    // changes detected after the pokemon was actually added to the team,
+    // not changes from before the user ever put it there. See adr-008.
+    addedAt: timestamp("added_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [primaryKey({ columns: [table.teamId, table.position] })],
 );

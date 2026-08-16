@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { teamPokemon, teams } from "@/db/schema";
-import { getRoster } from "@/server/team-roster";
+import { buildRosterRows, getRoster } from "@/server/team-roster";
 import { getOrCreateUserId } from "@/server/user";
 
 const MAX_TEAM_SIZE = 6;
@@ -38,15 +38,14 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
   try {
     await db.transaction(async (tx) => {
+      const existing = await tx
+        .select({ pokemonId: teamPokemon.pokemonId, addedAt: teamPokemon.addedAt })
+        .from(teamPokemon)
+        .where(eq(teamPokemon.teamId, teamId));
+
       await tx.delete(teamPokemon).where(eq(teamPokemon.teamId, teamId));
       if (pokemonIds.length > 0) {
-        await tx.insert(teamPokemon).values(
-          pokemonIds.map((pokemonId: number, index: number) => ({
-            teamId,
-            pokemonId,
-            position: index,
-          })),
-        );
+        await tx.insert(teamPokemon).values(buildRosterRows(teamId, pokemonIds, existing, new Date()));
       }
       await tx.update(teams).set({ updatedAt: new Date() }).where(eq(teams.id, teamId));
     });

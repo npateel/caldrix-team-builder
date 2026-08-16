@@ -32,3 +32,23 @@ export async function getRosters(teamIds: string[]): Promise<Map<string, RosterE
 export async function getRoster(teamId: string): Promise<RosterEntry[]> {
   return (await getRosters([teamId])).get(teamId) ?? [];
 }
+
+export type RosterRow = { teamId: string; pokemonId: number; position: number; addedAt: Date };
+
+// The rows a roster PUT should write: each pokemonId keeps the addedAt it
+// already had (reorders and add/remove of *other* slots shouldn't reset
+// it -- see adr-008), and only a genuinely new pokemonId gets `now`.
+export function buildRosterRows(
+  teamId: string,
+  pokemonIds: number[],
+  existing: { pokemonId: number; addedAt: Date }[],
+  now: Date,
+): RosterRow[] {
+  const addedAtByPokemonId = new Map(existing.map((row) => [row.pokemonId, row.addedAt]));
+  return pokemonIds.map((pokemonId, position) => ({
+    teamId,
+    pokemonId,
+    position,
+    addedAt: addedAtByPokemonId.get(pokemonId) ?? now,
+  }));
+}

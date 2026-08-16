@@ -36,6 +36,13 @@
       "when": 1786820939749,
       "tag": "0004_new_silver_sable",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786898886466,
+      "tag": "0005_moaning_iron_monger",
+      "breakpoints": true
     }
   ]
 }
