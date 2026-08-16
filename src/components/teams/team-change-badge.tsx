@@ -71,7 +71,7 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
           <span>Pokémon on your team have changed.</span>
           <span
             {...triggerProps}
-            className="w-fit cursor-pointer font-medium text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+            className="w-fit cursor-pointer font-medium text-violet-600 underline hover:text-violet-700 dark:text-violet-400 dark:hover:text-violet-300"
           >
             View details
           </span>

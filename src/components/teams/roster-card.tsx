@@ -38,11 +38,11 @@ function RosterStats({ pokemon, gap }: { pokemon: PokemonCardData; gap: string }
         <div key={key} className="flex flex-col items-center">
           <span className="text-[8px] uppercase text-zinc-400">{STAT_LABELS[i]}</span>
           <span
-            className={
+            className={`rounded px-1 text-[10px] ${
               boldStats.has(key)
-                ? "rounded bg-emerald-100 px-1 text-[10px] font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
-                : "text-[10px] font-medium text-zinc-700 dark:text-zinc-300"
-            }
+                ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
+                : "font-medium text-zinc-700 dark:text-zinc-300"
+            }`}
           >
             {pokemon[key]}
           </span>
@@ -73,7 +73,7 @@ export function RosterCard({
   const statGap = layout === "desktop" ? "gap-4" : "gap-2";
   const sprite = pokemon.spriteUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={pokemon.spriteUrl} alt={pokemon.name} width={32} height={32} className="shrink-0" />
+    <img src={pokemon.spriteUrl} alt={pokemon.name} width={32} height={32} className="shrink-0 scale-110" />
   ) : (
     <div className="h-8 w-8 shrink-0" />
   );

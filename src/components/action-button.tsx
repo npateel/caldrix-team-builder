@@ -10,7 +10,8 @@ import { useState } from "react";
 type Variant = "solid" | "link";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  solid: "rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black",
+  solid:
+    "rounded bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:opacity-50 dark:bg-violet-500 dark:hover:bg-violet-400",
   link: "text-xs text-red-600 hover:underline disabled:opacity-50 dark:text-red-400",
 };
 

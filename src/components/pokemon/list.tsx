@@ -140,8 +140,17 @@ export function PokemonList({
                   }}
                 >
                   <span className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {p.spriteUrl ? <img src={p.spriteUrl} alt={p.name} width={32} height={32} loading="lazy" /> : null}
+                    {p.spriteUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={p.spriteUrl}
+                        alt={p.name}
+                        width={32}
+                        height={32}
+                        loading="lazy"
+                        className="scale-110"
+                      />
+                    ) : null}
                     {selected ? (
                       <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-emerald-500 text-[9px] text-white">
                         ✓
@@ -161,11 +170,11 @@ export function PokemonList({
                   {STAT_KEYS.map((key) => (
                     <span
                       key={key}
-                      className={
+                      className={`w-fit rounded px-1 ${
                         boldStats.has(key)
-                          ? "w-fit rounded bg-emerald-100 px-1 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
-                          : undefined
-                      }
+                          ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
+                          : ""
+                      }`}
                     >
                       {p[key]}
                     </span>

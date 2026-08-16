@@ -54,13 +54,13 @@ export default async function Home() {
                 </div>
                 <Link
                   href={`/teams/${team.id}`}
-                  className="flex flex-col gap-3 rounded border border-black/10 p-3 hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:bg-white/5"
+                  className="flex flex-col gap-3 rounded border border-black/10 p-3 transition hover:border-violet-300 hover:shadow-md hover:shadow-violet-500/10 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:border-violet-800 dark:hover:shadow-violet-400/10"
                 >
                   <div className="min-w-0">
-                    <p className="flex items-center gap-1.5 font-medium">
+                    <div className="flex items-center gap-1.5 font-medium">
                       <span className="truncate">{team.name}</span>
                       <TeamChangeBadge alerts={changes} />
-                    </p>
+                    </div>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {roster.length} pokémon · updated {team.updatedAt.toLocaleDateString()}
                     </p>
@@ -76,6 +76,7 @@ export default async function Home() {
                             alt={entry.pokemon.name}
                             width={56}
                             height={56}
+                            className="scale-110"
                           />
                         ) : (
                           <div key={entry.pokemon.id} className="h-14 w-14" />
