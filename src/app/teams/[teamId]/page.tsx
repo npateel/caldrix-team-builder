@@ -1,7 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { TeamDetail } from "@/components/team-detail";
+import { TeamDetail } from "@/components/teams/team-detail";
 import { db } from "@/db";
 import { pokemon, teams } from "@/db/schema";
 import { getRoster } from "@/server/team-roster";

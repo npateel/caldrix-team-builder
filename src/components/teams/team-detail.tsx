@@ -6,11 +6,11 @@ import type { PokemonCardData } from "@/lib/pokemon-stats";
 import { usePokemonFilters } from "@/lib/use-pokemon-filters";
 import { useRosterDragReorder } from "@/lib/use-roster-drag-reorder";
 import type { RosterEntry } from "@/server/team-roster";
-import { PokemonFilterBar } from "./pokemon-filter-bar";
-import { PokemonGrid } from "./pokemon-grid";
-import { PokemonList } from "./pokemon-list";
+import { PokemonFilterBar } from "../pokemon/filter-bar";
+import { PokemonGrid } from "../pokemon/grid";
+import { PokemonList } from "../pokemon/list";
 import { DropLine, RosterCard, RosterRowControls, type RosterRowLayout } from "./roster-card";
-import { TeamTypeCoverage } from "./team-type-coverage";
+import { TeamTypeCoverage } from "./type-coverage";
 
 const MAX_TEAM_SIZE = 6;
 // 3 columns (roster | pokedex | coverage) above this container width, tabs

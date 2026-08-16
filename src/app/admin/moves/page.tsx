@@ -1,5 +1,5 @@
 import { asc } from "drizzle-orm";
-import { AdminMovesTable } from "@/components/admin-moves-table";
+import { AdminMovesTable } from "@/components/admin/moves-table";
 import { db } from "@/db";
 import { moves } from "@/db/schema";
 

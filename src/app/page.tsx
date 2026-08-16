@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { ActionButton } from "@/components/action-button";
 import { SignInButtons } from "@/components/auth-nav";
-import { CreateTeamButton } from "@/components/create-team-button";
+import { CreateTeamButton } from "@/components/teams/create-team-button";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
 import { getRosters } from "@/server/team-roster";

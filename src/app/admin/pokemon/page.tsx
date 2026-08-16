@@ -1,5 +1,5 @@
 import { asc } from "drizzle-orm";
-import { PokemonBrowser } from "@/components/pokemon-browser";
+import { PokemonBrowser } from "@/components/pokemon/browser";
 import { ActionButton } from "@/components/action-button";
 import { db } from "@/db";
 import { pokemon } from "@/db/schema";
