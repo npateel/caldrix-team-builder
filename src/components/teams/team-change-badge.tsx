@@ -26,7 +26,7 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
     >
       <TriangleAlert size={14} className="text-amber-600 dark:text-amber-400" />
       <span
-        className="pointer-events-none absolute left-1/2 top-full z-20 mt-1.5 hidden w-64 -translate-x-1/2 flex-col gap-1.5 rounded-lg border border-amber-300 bg-amber-50 p-2.5 text-left text-xs normal-case text-amber-900 shadow-lg group-hover/badge:flex group-focus-visible/badge:flex dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
+        className="pointer-events-none absolute left-full top-1/2 z-20 ml-1.5 hidden w-64 -translate-y-1/2 flex-col gap-1.5 rounded-lg border border-amber-300 bg-amber-50 p-2.5 text-left text-xs normal-case text-amber-900 shadow-lg group-hover/badge:flex group-focus-visible/badge:flex dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
       >
         {events.map((event) => (
           <span key={`${event.pokemonId}-${event.detectedAt.toISOString()}`}>
