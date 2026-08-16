@@ -18,8 +18,10 @@ so there's no way to trigger a genuine detected change on demand.
   per (change, team) pair -- if the same pokemon sits on two of a user's
   teams, both get their own alert, since the change is independently
   relevant to each.
-- `src/components/teams/change-alerts.tsx`: a plain banner rendering that
-  list, shown at the top of the home page (`/`) when non-empty. No
+- `src/components/teams/team-change-badge.tsx`: a small warning icon next
+  to each team's name on the home page (`/`), shown only for teams with
+  recent changes, with a hover/focus tooltip listing what changed (see the
+  UI update below for why this replaced an earlier banner design). No
   read/dismissed state -- `changes` has nowhere to track that per-user, and
   the 7-day window already rolls entries off on its own.
 - Demo mechanism (`src/server/simulate-change.ts`, wired to a new
@@ -53,18 +55,37 @@ team-pokemon scope as scan-changes.ts (adr-006), reusing the fresh data
 reseed already fetched rather than making its own PokéAPI calls. Both jobs
 now agree: whichever one happens to run first catches the change.
 
+## Update: banner didn't scale, replaced with per-team warning badges
+
+The first version was a single banner at the top of `/` listing every
+changed pokemon across every team, one line per changed field. Two
+problems in practice: it doesn't scale -- once several teams each have
+several changes, the banner dominates the page above the team list it's
+supposed to be annotating -- and a pokemon with 3 changed stats produced 3
+separate lines instead of reading as one event.
+
+Replaced with `TeamChangeBadge`: a small `TriangleAlert` icon next to each
+team's name, shown only when that team has recent changes, sized to not
+disrupt the layout regardless of how many teams have alerts. Hovering (or
+focusing, for keyboard/touch users) reveals a tooltip with the details,
+scoped to just that team. `src/lib/group-team-changes.ts` collapses
+multiple field-diff rows for the same pokemon from the same scan/reseed
+run (same `detectedAt`, since a single multi-row `INSERT` gets one
+`now()`) into one line -- "bulbasaur: attack 49→55, hp 45→50" instead of
+two. Pure CSS tooltip (`group-hover`/`group-focus-visible`), no client JS.
+
 ## Alternatives
 
 1. Insert a fabricated row directly into `changes` for the demo, instead
    of going through the real scan job. Simpler, but proves nothing about
    whether the actual detection pipeline works -- exactly the kind of
    "testing the mock" this is trying to avoid at the feature level.
-2. Show alerts per-team on each team's own detail page instead of one
-   global banner on `/`. More contextual, but `/` already lists every team
-   the user has and is the first thing they see after signing in --
-   splitting alerts across N team pages makes them easier to miss and
-   doesn't reduce the amount of code much, since the per-team query is a
-   strict subset of the global one.
+2. Show alerts on each team's own detail page instead of next to its name
+   in the home page list. More contextual once you're already on that
+   team's page, but `/` is the first thing a user sees after signing in,
+   and the badge only costs one icon per team card -- a per-team-page
+   alert would need its own placement decision on that page too, for no
+   real benefit over just glancing at the icon from the team list.
 3. Add a `changes_seen` table (or a per-user `last_seen_at` marker) so
    alerts can be dismissed. More typical for a real notifications feature,
    but adds a schema migration and read-state bookkeeping for a

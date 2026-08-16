@@ -3,8 +3,8 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { ActionButton } from "@/components/action-button";
 import { SignInButtons } from "@/components/auth-nav";
-import { ChangeAlerts } from "@/components/teams/change-alerts";
 import { CreateTeamButton } from "@/components/teams/create-team-button";
+import { TeamChangeBadge } from "@/components/teams/team-change-badge";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
 import { getRecentTeamChanges } from "@/server/team-changes";
@@ -30,15 +30,13 @@ export default async function Home() {
     .from(teams)
     .where(eq(teams.userId, session.user.id))
     .orderBy(desc(teams.updatedAt));
-  const [rosters, changeAlerts] = await Promise.all([
+  const [rosters, changesByTeam] = await Promise.all([
     getRosters(userTeams.map((team) => team.id)),
     getRecentTeamChanges(session.user.id),
   ]);
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
-      <ChangeAlerts alerts={changeAlerts} />
-
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Your teams</h1>
         <CreateTeamButton />
@@ -50,6 +48,7 @@ export default async function Home() {
         <ul className="flex flex-col gap-2">
           {userTeams.map((team) => {
             const roster = rosters.get(team.id) ?? [];
+            const changes = changesByTeam.get(team.id) ?? [];
             return (
               <li key={team.id} className="relative">
                 <div className="absolute right-2 top-2 z-10 rounded bg-white/90 px-1.5 py-1 shadow-sm dark:bg-zinc-900/90">
@@ -67,7 +66,10 @@ export default async function Home() {
                   className="flex flex-col gap-3 rounded border border-black/10 p-3 hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:bg-white/5"
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{team.name}</p>
+                    <p className="flex items-center gap-1.5 font-medium">
+                      <span className="truncate">{team.name}</span>
+                      <TeamChangeBadge alerts={changes} />
+                    </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {roster.length} pokémon · updated {team.updatedAt.toLocaleDateString()}
                     </p>

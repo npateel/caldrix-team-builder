@@ -18,14 +18,14 @@ export type TeamChangeAlert = {
 
 // Task 2's user-facing alert requirement: pokemon-entity changes detected
 // in the last 7 days, scoped to whichever of the user's own teams
-// currently have that pokemon on the roster. One row per (change, team)
-// pair -- if the same pokemon sits on two of the user's teams, that change
-// is relevant to both, so both get their own alert row rather than being
-// collapsed into one.
-export async function getRecentTeamChanges(userId: string): Promise<TeamChangeAlert[]> {
+// currently have that pokemon on the roster, grouped by team (mirrors
+// getRosters' shape) so each team's card can show only its own changes.
+// One row per (change, team) pair before grouping -- if the same pokemon
+// sits on two of the user's teams, that change is relevant to both.
+export async function getRecentTeamChanges(userId: string): Promise<Map<string, TeamChangeAlert[]>> {
   const since = new Date(Date.now() - ALERT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 
-  return db
+  const rows = await db
     .select({
       id: changes.id,
       teamId: teams.id,
@@ -43,4 +43,12 @@ export async function getRecentTeamChanges(userId: string): Promise<TeamChangeAl
     .innerJoin(teams, eq(teamPokemon.teamId, teams.id))
     .where(and(eq(changes.entityType, "pokemon"), eq(teams.userId, userId), gte(changes.detectedAt, since)))
     .orderBy(desc(changes.detectedAt));
+
+  const byTeam = new Map<string, TeamChangeAlert[]>();
+  for (const row of rows) {
+    const existing = byTeam.get(row.teamId);
+    if (existing) existing.push(row);
+    else byTeam.set(row.teamId, [row]);
+  }
+  return byTeam;
 }
