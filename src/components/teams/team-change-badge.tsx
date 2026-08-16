@@ -36,6 +36,13 @@ import type { TeamChangeAlert } from "@/server/team-changes";
 // itself stays independently clickable (not just the link) since it's
 // the only thing reachable without hover -- the necessary fallback for
 // keyboard and touch, where there's no "hover the icon" step at all.
+//
+// The same nesting problem applies to *closing* the dialog: `<dialog>`
+// only renders in the browser's top layer (paint/stacking), it's still
+// a DOM descendant of that same `<Link>` -- so a backdrop click or the
+// close button's click bubbles right back up to it too, unless stopped.
+// closeDialog carries the same stopPropagation/preventDefault as
+// opening it, for that reason.
 export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const changes = consolidateTeamChanges(alerts);
@@ -55,8 +62,15 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
     dialogRef.current?.showModal();
   }
 
+  function closeDialog(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dialogRef.current?.close();
+  }
+
   function closeOnBackdropClick(e: MouseEvent<HTMLDialogElement>) {
-    if (e.target === dialogRef.current) dialogRef.current?.close();
+    if (e.target !== dialogRef.current) return;
+    closeDialog(e);
   }
 
   return (
@@ -94,7 +108,7 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
             <h2 className="text-sm font-semibold">Recent changes</h2>
             <button
               type="button"
-              onClick={() => dialogRef.current?.close()}
+              onClick={closeDialog}
               aria-label="Close"
               className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
             >
