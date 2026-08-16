@@ -26,18 +26,6 @@ prefer small diffs, clarify assumptions before acting, and keep communication te
 - Shareable repo with all code + README.
 - Frontend hosted at a public URL.
 
-## Stack (decided)
-- Next.js (App Router, TypeScript) — single app for frontend + API routes.
-- Deployed on Vercel (project `caldrix-team-builder` already linked).
-- Neon (Postgres) for storage, via Vercel's native integration.
-- Drizzle ORM for schema + migrations.
-- Vercel Cron → API route for the Task 2 scan job.
-
-## PokéAPI
-Base URL: `https://pokeapi.co/api/v2/`
-- `GET /pokemon` — list
-- `GET /pokemon/{id}` — `name`, `types[].type.name`, `stats[]`, `sprites.front_default`
-
 ## Decided (previously open items)
 - Testing framework: Vitest, with manual `__mocks__` for `@/db` and
   `@/lib/user` so route tests don't need a live database.
