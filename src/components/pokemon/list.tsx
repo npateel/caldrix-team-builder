@@ -170,11 +170,11 @@ export function PokemonList({
                   {STAT_KEYS.map((key) => (
                     <span
                       key={key}
-                      className={
+                      className={`w-fit rounded px-1 ${
                         boldStats.has(key)
-                          ? "w-fit rounded bg-emerald-100 px-1 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
-                          : undefined
-                      }
+                          ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
+                          : ""
+                      }`}
                     >
                       {p[key]}
                     </span>

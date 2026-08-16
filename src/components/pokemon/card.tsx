@@ -81,11 +81,11 @@ export function PokemonCard({
           <div key={key} className="flex items-center justify-between">
             <dt className="uppercase">{label}</dt>
             <dd
-              className={
+              className={`rounded px-1 py-0.5 ${
                 boldStats.has(key)
-                  ? "rounded bg-emerald-100 px-1 py-0.5 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
+                  ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
                   : "font-medium text-zinc-700 dark:text-zinc-300"
-              }
+              }`}
             >
               {pokemon[key]}
             </dd>

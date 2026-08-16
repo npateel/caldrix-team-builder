@@ -38,11 +38,11 @@ function RosterStats({ pokemon, gap }: { pokemon: PokemonCardData; gap: string }
         <div key={key} className="flex flex-col items-center">
           <span className="text-[8px] uppercase text-zinc-400">{STAT_LABELS[i]}</span>
           <span
-            className={
+            className={`rounded px-1 text-[10px] ${
               boldStats.has(key)
-                ? "rounded bg-emerald-100 px-1 text-[10px] font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
-                : "text-[10px] font-medium text-zinc-700 dark:text-zinc-300"
-            }
+                ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
+                : "font-medium text-zinc-700 dark:text-zinc-300"
+            }`}
           >
             {pokemon[key]}
           </span>
