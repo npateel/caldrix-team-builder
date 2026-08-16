@@ -4,10 +4,22 @@ import { ALL_TYPES, effectiveness, isWeakTo, type TypeName } from "./type-chart"
 
 type PokemonRow = typeof pokemon.$inferSelect;
 
-const OFFENSE_WEIGHT = 2;
-const DEFENSE_WEIGHT = 2;
+const OFFENSE_WEIGHT = 3.5;
+const DEFENSE_WEIGHT = 3.5;
 const SPEED_WEIGHT = 0.01;
 const SYNERGY_WEIGHT = 1.5;
+const STAT_TOTAL_WEIGHT = 0.01;
+
+function statTotal(pokemon: PokemonRow): number {
+  return (
+    pokemon.hp +
+    pokemon.attack +
+    pokemon.defense +
+    pokemon.specialAttack +
+    pokemon.specialDefense +
+    pokemon.speed
+  );
+}
 
 function offenseMultiplier(candidate: PokemonRow, enemy: PokemonRow): number {
   return Math.max(...candidate.types.map((atk) => effectiveness(atk, enemy.types)));
@@ -53,7 +65,8 @@ export function generateCounterTeam(enemyRoster: RosterEntry[], candidatePool: P
       let score =
         offenseMultiplier(candidate, enemy) * OFFENSE_WEIGHT -
         incomingMultiplier(candidate, enemy) * DEFENSE_WEIGHT +
-        (candidate.speed - enemy.speed) * SPEED_WEIGHT;
+        (candidate.speed - enemy.speed) * SPEED_WEIGHT +
+        statTotal(candidate) * STAT_TOTAL_WEIGHT;
       if (applySynergy) score -= synergyPenalty(candidate.types, weaknessCounts) * SYNERGY_WEIGHT;
       if (score > bestScore) {
         bestScore = score;
