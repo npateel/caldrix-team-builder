@@ -32,14 +32,14 @@ export function PokemonFilterBar({
           <button
             type="button"
             onClick={() => setView("grid")}
-            className={`px-3 py-1.5 ${view === "grid" ? "bg-blue-600 text-white dark:bg-blue-500" : ""}`}
+            className={`px-3 py-1.5 ${view === "grid" ? "bg-violet-600 text-white dark:bg-violet-500" : ""}`}
           >
             Grid
           </button>
           <button
             type="button"
             onClick={() => setView("list")}
-            className={`px-3 py-1.5 ${view === "list" ? "bg-blue-600 text-white dark:bg-blue-500" : ""}`}
+            className={`px-3 py-1.5 ${view === "list" ? "bg-violet-600 text-white dark:bg-violet-500" : ""}`}
           >
             List
           </button>

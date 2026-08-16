@@ -11,7 +11,7 @@ type Variant = "solid" | "link";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
   solid:
-    "rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-400",
+    "rounded bg-violet-600 px-3 py-1.5 text-sm text-white hover:bg-violet-700 disabled:opacity-50 dark:bg-violet-500 dark:hover:bg-violet-400",
   link: "text-xs text-red-600 hover:underline disabled:opacity-50 dark:text-red-400",
 };
 

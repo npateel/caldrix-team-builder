@@ -14,8 +14,8 @@ function NavLink({ href, label, active }: { href: string; label: string; active:
       href={href}
       className={`border-b-2 pb-1 transition-colors ${
         active
-          ? "border-blue-600 font-semibold text-blue-600 dark:border-blue-400 dark:text-blue-400"
-          : "border-transparent text-zinc-500 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
+          ? "border-violet-600 font-semibold text-violet-600 dark:border-violet-400 dark:text-violet-400"
+          : "border-transparent text-zinc-500 hover:text-violet-600 dark:text-zinc-400 dark:hover:text-violet-400"
       }`}
     >
       {label}
