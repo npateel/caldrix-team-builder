@@ -18,7 +18,7 @@ depend on that user id.
   used under the JWT strategy.
 - `users` gains `name`/`email`/`emailVerified`/`image` columns (unused by
   anonymous users, populated by the adapter on OAuth sign-in).
-- `src/lib/user.ts`'s `getOrCreateUserId()` now checks `auth()` first and
+- `src/server/user.ts`'s `getOrCreateUserId()` now checks `auth()` first and
   returns the real session's user id if signed in, falling back to the
   existing anonymous-cookie logic otherwise. This was the whole point of
   keeping `teams.user_id` as a real FK from day one (adr-004) -- none of the
