@@ -15,17 +15,11 @@ export type TeamChangeAlert = {
   detectedAt: Date;
 };
 
-// Task 2's user-facing alert requirement: pokemon-entity changes detected
-// in the last 7 days, scoped to whichever of the user's own teams
-// currently have that pokemon on the roster, grouped by team (mirrors
-// getRosters' shape) so each team's card can show only its own changes.
-// One row per (change, team) pair before grouping -- if the same pokemon
-// sits on two of the user's teams, that change is relevant to both.
-//
-// Also requires the change to have happened *after* team_pokemon.addedAt
-// for that specific team -- otherwise adding a pokemon someone else
-// changed last week onto a brand-new team would surface an alert for a
-// change the user never actually saw happen on their own roster.
+// Task 2's alert query: pokemon changes from the last 7 days on the
+// user's own teams, grouped by team (mirrors getRosters' shape). Also
+// requires the change to be after team_pokemon.addedAt, so adding a
+// pokemon someone else's team had already seen change doesn't surface a
+// stale alert the user never actually witnessed.
 export async function getRecentTeamChanges(userId: string): Promise<Map<string, TeamChangeAlert[]>> {
   const since = new Date(Date.now() - ALERT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
 

@@ -5,61 +5,25 @@ import { useRef, type KeyboardEvent, type MouseEvent } from "react";
 import { consolidateTeamChanges } from "@/lib/consolidate-team-changes";
 import type { TeamChangeAlert } from "@/server/team-changes";
 
-// Task 2's user-facing alert, scoped to one team -- a small warning icon
-// next to the team name (rather than one banner listing every team's
-// changes at once, which doesn't scale once several teams have several
-// changes each). On devices that actually support hovering, hovering (or
-// focusing, for keyboard users) reveals a small popover with a "View
-// details" link; clicking it opens a dialog, centered on screen, with the
-// actual old-vs-new detail.
+// Task 2's per-team change alert: a warning icon whose hover popover (or,
+// on touch/keyboard, a direct tap/Enter) opens a centered dialog with the
+// old-vs-new detail.
 //
-// The popover only ever shows for real hover, gated behind
-// `@media (hover: hover)` (focus-visible is left ungated -- keyboard
-// access shouldn't depend on pointer capability). Touch has no hover, so
-// on a touch device the popover step is skipped entirely and a tap on the
-// icon goes straight through its onClick to open the dialog directly.
-// This isn't just "no separate mobile handling needed" the way it first
-// looked -- plain `:hover` (not gated) gets *simulated* by mobile
-// browsers on a first tap, which would eat that tap to reveal the
-// popover instead of firing the click, requiring a second tap to
-// actually open the dialog. The `(hover: hover)` gate is what prevents
-// that: on a real touch device the popover styles never apply, so
-// there's no simulated-hover state to consume the tap in the first
-// place. The icon's own tap target is also padded well past its 14px
-// glyph size, since a target that small is hard to hit reliably with a
-// finger.
+// The hover popover is gated behind `@media (hover: hover)` -- ungated
+// `:hover` gets simulated by mobile browsers on a first tap, which would
+// eat that tap instead of firing the click. It's also not
+// pointer-events-none and sits flush against the icon (no `ml-*` gap), so
+// the mouse can travel from icon to link without `:hover` dropping
+// mid-transit -- a real gap is a dead zone `:hover` has no grace period
+// for.
 //
-// The popover is deliberately *not* pointer-events-none like a plain
-// tooltip -- it needs to stay open while the mouse travels from the icon
-// onto the link inside it. CSS keeps `group-hover/badge` active for as
-// long as the pointer is over the icon OR any descendant (the popover
-// included) that can receive pointer events, regardless of the
-// popover's own position, so this "hover, then move onto the popover
-// itself" works without any JS -- as long as the two boxes actually
-// touch. There's no `ml-*`/gap between the icon and the popover for
-// exactly that reason: `:hover` has no grace period, so a real gap
-// between them is a dead zone where the pointer is over neither, and
-// the popover vanishes the instant it's crossed, before the mouse ever
-// reaches the link. The `px-2.5` on the popover still gives the text
-// its own visual breathing room from the icon, just as internal padding
-// instead of external margin.
-//
-// Both the icon and the inner link are nested inside the team card's own
-// `<Link>`, so both are `role="button"` spans (not real `<button>`s,
-// which browsers handle badly nested inside an `<a>`) with
-// stopPropagation/preventDefault so clicking either opens the dialog
-// instead of navigating the card, plus their own keydown handling since
-// non-native buttons don't get Enter/Space activation for free. The icon
-// itself stays independently clickable (not just the link) since it's
-// the only thing reachable without hover -- the necessary fallback for
-// keyboard and touch, where there's no "hover the icon" step at all.
-//
-// The same nesting problem applies to *closing* the dialog: `<dialog>`
-// only renders in the browser's top layer (paint/stacking), it's still
-// a DOM descendant of that same `<Link>` -- so a backdrop click or the
-// close button's click bubbles right back up to it too, unless stopped.
-// closeDialog carries the same stopPropagation/preventDefault as
-// opening it, for that reason.
+// Everything here (icon, link, dialog) is nested inside the team card's
+// own `<Link>`, which browsers handle badly with a real nested `<button>`.
+// Triggers are `role="button"` spans instead, and every open/close path
+// (click, keydown, backdrop click, close button) calls stopPropagation/
+// preventDefault so it doesn't also navigate the card -- including dialog
+// close, since `<dialog>` only escapes the DOM visually (top layer), not
+// for event bubbling.
 export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const changes = consolidateTeamChanges(alerts);

@@ -28,12 +28,10 @@ export type ReseedResult = {
   changesLogged: number;
 };
 
-// Same scope as scan-changes.ts (pokemon currently on at least one team,
-// see adr-006) and the same diffPokemon used there -- reseed already has
-// fresh data for every pokemon in hand from the bulk fetch below, so this
-// just needs the pre-overwrite cached rows to diff against. Without this,
-// reseed's blind upsert would silently erase a real discrepancy the scan
-// job would otherwise have caught and logged -- see adr-008.
+// Same team-pokemon scope as scan-changes.ts (adr-006) and the same
+// diffPokemon -- diffs the pre-overwrite cached rows against the fresh
+// data reseed already has in hand, so its blind upsert can't silently
+// erase a discrepancy the scan job would otherwise have caught (adr-008).
 export async function recordTeamPokemonChanges(freshRows: FreshPokemon[]): Promise<number> {
   const rows = await db
     .selectDistinct({ pokemon })
@@ -64,14 +62,11 @@ export async function recordTeamPokemonChanges(freshRows: FreshPokemon[]): Promi
   return changeRows.length;
 }
 
-// Full bulk refresh of the pokemon/moves cache, live from PokéAPI. Unlike
-// scan-changes.ts, this refreshes everything, not just team pokemon -- but
-// it also logs to `changes` for the team-pokemon subset
-// (recordTeamPokemonChanges above), so a genuine change doesn't go
-// undetected just because reseed happened to run before the next scan.
-// The two jobs together are what adr-004 originally described as one. See
-// adr-007 for why this is a separate job, and its serverless
-// timing/memory tradeoffs.
+// Full bulk refresh of the pokemon/moves cache, live from PokéAPI -- unlike
+// scan-changes.ts, refreshes everything, not just team pokemon, but also
+// logs team-pokemon changes (recordTeamPokemonChanges above) so reseed
+// running before the next scan can't hide a genuine change. See adr-007
+// for why this is a separate job (serverless timing/memory tradeoffs).
 export async function reseed(): Promise<ReseedResult> {
   const [pokemonList, moveList] = await Promise.all([
     fetchJson<{ results: NamedApiResource[] }>(`${POKEAPI_BASE}/pokemon?limit=100000`),

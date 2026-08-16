@@ -10,14 +10,14 @@ reasonably current automatically.
 
 ## Proposed solution
 
-- `src/lib/reseed.ts`: refetches every pokemon and move live from PokéAPI
-  (concurrency 20, same `pMap`/`fetchJson` helpers the local `seed:fetch`
-  script uses -- moved to `src/lib/http.ts` so both can share them) and
-  upserts into `pokemon`/`moves`/`pokemon_moves`. Does *not* write to
-  `changes` -- that's the scan job's concern, scoped to what users would
-  actually be alerted about. Together, the two jobs are what adr-004
-  originally described as one ("refresh everything, log changes for team
-  pokemon"), just split into two so each fits its constraints.
+- `src/server/reseed.ts`: refetches every pokemon and move live from
+  PokéAPI (concurrency 20, same `pMap`/`fetchJson` helpers the local
+  `seed:fetch` script uses -- moved to `src/lib/http.ts` so both can
+  share them) and upserts into `pokemon`/`moves`/`pokemon_moves`.
+  Together with the scan job, this is what adr-004 originally described
+  as one ("refresh everything, log changes for team pokemon"), split in
+  two so each fits its constraints. (Originally reseed didn't write to
+  `changes` at all -- adr-008 revised that once a real gap showed up.)
 - `/api/cron/reseed`, same dual-trigger pattern as `/api/cron/scan-changes`
   (adr-006): Vercel Cron via `CRON_SECRET`, or an admin's "Reseed cache now"
   button on `/admin/pokemon`.

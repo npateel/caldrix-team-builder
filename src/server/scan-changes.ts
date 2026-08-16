@@ -15,13 +15,10 @@ export type ScanResult = {
   changes: (FieldDiff & { pokemonId: number; name: string })[];
 };
 
-// Only refetches pokemon currently on at least one team, live from PokéAPI --
-// not the whole ~1300-row cache. See adr-006 for why: this runs inside a
-// request/cron-triggered serverless function, and Task 2 only cares about
-// pokemon actually in use. The full cache is kept fresh separately by the
-// bulk reseed job (reseed.ts), which also logs to `changes` for this same
-// team-pokemon subset (see adr-008) so a genuine change can't slip through
-// undetected just because reseed ran before the next scan.
+// Only refetches pokemon currently on at least one team, not the whole
+// ~1300-row cache -- adr-006. The bulk reseed job (reseed.ts) covers the
+// rest, and also logs to `changes` for this same subset (adr-008) so
+// reseed running first can't hide a genuine change from this scan.
 export async function scanForChanges(): Promise<ScanResult> {
   const ids = await getTeamPokemonIds();
   const result: ScanResult = { checked: 0, changed: 0, changes: [] };

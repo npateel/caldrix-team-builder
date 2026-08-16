@@ -9,7 +9,7 @@ signed-in user.
 ## Proposed solution
 
 - `users.isAdmin` boolean column (default false), checked by a
-  `requireAdmin()` helper (`src/lib/admin.ts`) that every admin route calls.
+  `requireAdmin()` helper (`src/server/admin.ts`) that every admin route calls.
   No self-serve way to become an admin -- flip the column by hand (db:studio
   or a one-off query) for whoever needs access. Reasonable for a take-home
   with a handful of admins; a real product would want an invite/promotion
