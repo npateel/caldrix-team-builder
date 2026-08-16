@@ -1,6 +1,6 @@
 import { defensiveCoverage, offensiveCoverage } from "@/lib/team-coverage";
 import { POKEMON_TYPE_NAMES, TYPE_COLORS } from "@/lib/type-colors";
-import type { RosterEntry } from "@/lib/team-roster";
+import type { RosterEntry } from "@/server/team-roster";
 
 export function TeamTypeCoverage({ roster }: { roster: RosterEntry[] }) {
   if (roster.length === 0) {

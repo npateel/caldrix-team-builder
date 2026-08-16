@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
-import { scanForChanges } from "@/lib/scan-changes";
+import { isAdmin } from "@/server/admin";
+import { scanForChanges } from "@/server/scan-changes";
 
 // Two ways in: Vercel Cron (see vercel.json), authenticated via
 // CRON_SECRET, or an admin manually triggering a scan from /admin/changes.

@@ -6,7 +6,7 @@ import { SignInButtons } from "@/components/auth-nav";
 import { CreateTeamButton } from "@/components/create-team-button";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
-import { getRosters } from "@/lib/team-roster";
+import { getRosters } from "@/server/team-roster";
 
 export default async function Home() {
   const session = await auth();

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 vi.mock("@/db");
-vi.mock("@/lib/user");
+vi.mock("@/server/user");
 
 import { push, reset } from "@/db";
 import { PUT } from "./route";

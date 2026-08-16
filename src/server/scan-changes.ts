@@ -1,7 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { changes, pokemon, teamPokemon } from "@/db/schema";
-import { transformPokemon, type FreshPokemon } from "./pokeapi-transform";
+import { transformPokemon, type FreshPokemon } from "@/lib/pokeapi-transform";
 
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 

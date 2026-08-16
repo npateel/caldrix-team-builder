@@ -1,5 +1,5 @@
 import { pokemon } from "@/db/schema";
-import type { RosterEntry } from "./team-roster";
+import type { RosterEntry } from "@/server/team-roster";
 import { ALL_TYPES, effectiveness, isWeakTo, type TypeName } from "./type-chart";
 
 type PokemonRow = typeof pokemon.$inferSelect;

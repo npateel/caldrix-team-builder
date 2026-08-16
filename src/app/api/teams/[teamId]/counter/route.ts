@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { pokemon, teams } from "@/db/schema";
 import { generateCounterTeam } from "@/lib/counter-team";
-import { getRoster } from "@/lib/team-roster";
-import { getOrCreateUserId } from "@/lib/user";
+import { getRoster } from "@/server/team-roster";
+import { getOrCreateUserId } from "@/server/user";
 
 type Params = { params: Promise<{ teamId: string }> };
 

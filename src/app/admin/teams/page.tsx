@@ -2,7 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { ActionButton } from "@/components/action-button";
 import { db } from "@/db";
 import { teams, users } from "@/db/schema";
-import { getRosters } from "@/lib/team-roster";
+import { getRosters } from "@/server/team-roster";
 
 export default async function AdminTeamsPage() {
   const allTeams = await db

@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { moves, pokemon, pokemonMoves } from "@/db/schema";
-import { fetchJson, pMap } from "./http";
-import { transformMove, transformPokemon, type FreshMove } from "./pokeapi-transform";
+import { fetchJson, pMap } from "@/lib/http";
+import { transformMove, transformPokemon, type FreshMove } from "@/lib/pokeapi-transform";
 
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 const CONCURRENCY = 20;

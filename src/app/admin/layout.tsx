@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/admin";
+import { requireAdmin } from "@/server/admin";
 
 const NAV_ITEMS = [
   { href: "/admin/users", label: "Users" },
