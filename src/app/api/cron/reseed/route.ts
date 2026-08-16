@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { isAdmin } from "@/lib/admin";
-import { reseed } from "@/lib/reseed";
+import { isAdmin } from "@/server/admin";
+import { reseed } from "@/server/reseed";
 
 // ~2200 PokéAPI calls even at CONCURRENCY=20 -- needs a paid Vercel plan's
 // higher function duration ceiling (Hobby's default won't cover this). See

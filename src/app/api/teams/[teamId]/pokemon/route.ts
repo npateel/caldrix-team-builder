@@ -2,8 +2,8 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { teamPokemon, teams } from "@/db/schema";
-import { getRoster } from "@/lib/team-roster";
-import { getOrCreateUserId } from "@/lib/user";
+import { getRoster } from "@/server/team-roster";
+import { getOrCreateUserId } from "@/server/user";
 
 const MAX_TEAM_SIZE = 6;
 

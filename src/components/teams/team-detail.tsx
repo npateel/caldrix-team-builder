@@ -1,16 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import type { PokemonCardData } from "@/lib/pokemon-stats";
+import { useContainerWidth } from "@/lib/use-container-width";
 import { usePokemonFilters } from "@/lib/use-pokemon-filters";
 import { useRosterDragReorder } from "@/lib/use-roster-drag-reorder";
-import type { RosterEntry } from "@/lib/team-roster";
-import type { PokemonCardData } from "./pokemon-card";
-import { PokemonFilterBar } from "./pokemon-filter-bar";
-import { PokemonGrid } from "./pokemon-grid";
-import { PokemonList } from "./pokemon-list";
+import type { RosterEntry } from "@/server/team-roster";
+import { PokemonFilterBar } from "../pokemon/filter-bar";
+import { PokemonGrid } from "../pokemon/grid";
+import { PokemonList } from "../pokemon/list";
 import { DropLine, RosterCard, RosterRowControls, type RosterRowLayout } from "./roster-card";
-import { TeamTypeCoverage } from "./team-type-coverage";
+import { TeamTypeCoverage } from "./type-coverage";
 
 const MAX_TEAM_SIZE = 6;
 // 3 columns (roster | pokedex | coverage) above this container width, tabs
@@ -48,15 +49,7 @@ export function TeamDetail({
   const [tab, setTab] = useState<Tab>("pokedex");
   const [quickAddQuery, setQuickAddQuery] = useState("");
 
-  const outerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  useEffect(() => {
-    const el = outerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const [outerRef, containerWidth] = useContainerWidth();
   const isDesktop = containerWidth >= LAYOUT_BREAKPOINT;
   const rosterRowLayout: RosterRowLayout = isDesktop
     ? "desktop"
@@ -73,10 +66,7 @@ export function TeamDetail({
   const rosterCompositionKey = useMemo(() => [...rosterIds].sort((a, b) => a - b).join(","), [rosterIds]);
 
   useEffect(() => {
-    if (roster.length === 0) {
-      setCounterTeam(null);
-      return;
-    }
+    if (roster.length === 0) return;
 
     let cancelled = false;
     setCounterLoading(true);
@@ -100,6 +90,15 @@ export function TeamDetail({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rosterCompositionKey, team.id]);
+
+  // Derived rather than cleared from the effect above: an empty roster has no
+  // counter team, and clearing it with setState in an effect body is exactly
+  // the cascading render react-hooks/set-state-in-effect warns about. This
+  // also stops "Generating…" sticking around when the roster empties
+  // mid-request, since that request's own cleanup suppresses its state
+  // updates.
+  const displayedCounterTeam = roster.length > 0 ? counterTeam : null;
+  const showCounterLoading = roster.length > 0 && counterLoading;
 
   // Mobile Team tab's quick-add search -- separate from the pokedex picker's
   // own filters, and excludes anything already on the roster.
@@ -277,12 +276,12 @@ export function TeamDetail({
       <div className="flex flex-col gap-2 border-t border-black/10 pt-3 dark:border-white/10">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Counter team</h2>
-          {counterLoading ? <span className="text-xs text-zinc-400">Generating…</span> : null}
+          {showCounterLoading ? <span className="text-xs text-zinc-400">Generating…</span> : null}
         </div>
-        {counterTeam ? (
+        {displayedCounterTeam ? (
           <div className="flex flex-col">
             <div className="flex flex-col gap-1">
-              {counterTeam.map((p) => (
+              {displayedCounterTeam.map((p) => (
                 <div
                   key={p.id}
                   className="rounded-lg border border-black/10 bg-white p-2 dark:border-white/10 dark:bg-zinc-900"

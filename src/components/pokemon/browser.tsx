@@ -1,10 +1,10 @@
 "use client";
 
+import type { PokemonCardData } from "@/lib/pokemon-stats";
 import { usePokemonFilters } from "@/lib/use-pokemon-filters";
-import type { PokemonCardData } from "./pokemon-card";
-import { PokemonFilterBar } from "./pokemon-filter-bar";
-import { PokemonGrid } from "./pokemon-grid";
-import { PokemonList } from "./pokemon-list";
+import { PokemonFilterBar } from "./filter-bar";
+import { PokemonGrid } from "./grid";
+import { PokemonList } from "./list";
 
 // Standalone pokedex browser (search/filter/sort/grid-or-list), used as-is
 // on /pokedex and /admin/pokemon. The team builder's center picker column

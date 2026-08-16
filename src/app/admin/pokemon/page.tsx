@@ -1,6 +1,6 @@
 import { asc } from "drizzle-orm";
-import { PokemonBrowser } from "@/components/pokemon-browser";
-import { ReseedButton } from "@/components/reseed-button";
+import { PokemonBrowser } from "@/components/pokemon/browser";
+import { ActionButton } from "@/components/action-button";
 import { db } from "@/db";
 import { pokemon } from "@/db/schema";
 
@@ -13,7 +13,14 @@ export default async function AdminPokemonPage() {
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Pokémon cache ({allPokemon.length})</h1>
-        <ReseedButton />
+        <ActionButton
+          url="/api/cron/reseed"
+          label="Reseed cache now"
+          pendingLabel="Reseeding… (this takes a while)"
+          confirmMessage="Refetch the entire pokemon/moves cache from PokéAPI? This can take a minute or two."
+          summaryTemplate="{pokemon} pokemon, {moves} moves, {pokemonMoveLinks} links"
+          errorMessage="Reseed failed"
+        />
       </div>
       <div className="min-h-0 flex-1">
         <PokemonBrowser pokemon={allPokemon} />

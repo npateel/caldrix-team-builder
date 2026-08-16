@@ -11,6 +11,10 @@ const POKEMON_FILE = path.join("scripts", "data", "pokemon.jsonl");
 const MOVES_FILE = path.join("scripts", "data", "moves.jsonl");
 const BATCH_SIZE = 500;
 
+// Raw PokéAPI JSON, exactly as cached -- transformPokemon/transformMove are
+// the boundary that gives it a shape, and seedPokemonMoves narrows what it
+// reads inline. Same reason pokeapi-transform.ts takes `any`.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function readJsonl(file: string): any[] {
   return fs
     .readFileSync(file, "utf-8")

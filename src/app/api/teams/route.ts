@@ -2,8 +2,8 @@ import { asc, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
-import { getRosters } from "@/lib/team-roster";
-import { getOrCreateUserId } from "@/lib/user";
+import { getRosters } from "@/server/team-roster";
+import { getOrCreateUserId } from "@/server/user";
 
 export async function GET() {
   const userId = await getOrCreateUserId();

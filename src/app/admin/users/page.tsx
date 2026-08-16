@@ -1,5 +1,5 @@
 import { count, desc } from "drizzle-orm";
-import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
+import { ActionButton } from "@/components/action-button";
 import { db } from "@/db";
 import { teams, users } from "@/db/schema";
 
@@ -31,9 +31,13 @@ export default async function AdminUsersPage() {
               <td className="py-2 pr-4">{teamCountByUser.get(user.id) ?? 0}</td>
               <td className="py-2 pr-4">{user.createdAt.toLocaleDateString()}</td>
               <td className="py-2">
-                <ConfirmDeleteButton
+                <ActionButton
                   url={`/api/admin/users/${user.id}`}
+                  method="DELETE"
+                  label="Delete"
+                  pendingLabel="Deleting…"
                   confirmMessage={`Delete user ${user.email ?? user.id}? This deletes their teams too.`}
+                  variant="link"
                 />
               </td>
             </tr>

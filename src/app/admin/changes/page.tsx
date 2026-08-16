@@ -1,5 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
-import { RunScanButton } from "@/components/run-scan-button";
+import { ActionButton } from "@/components/action-button";
 import { db } from "@/db";
 import { changes, pokemon } from "@/db/schema";
 
@@ -15,7 +15,13 @@ export default async function AdminChangesPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Change log</h1>
-        <RunScanButton />
+        <ActionButton
+          url="/api/cron/scan-changes"
+          label="Run scan now"
+          pendingLabel="Scanning…"
+          summaryTemplate="Checked {checked}, {changed} changed"
+          errorMessage="Scan failed"
+        />
       </div>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         Only pokemon currently on at least one team are scanned (see adr-006). Showing the most recent 200 changes.

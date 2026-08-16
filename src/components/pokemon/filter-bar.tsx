@@ -1,6 +1,7 @@
 import type { TypeName } from "@/lib/type-chart";
-import { POKEMON_TYPE_NAMES, TYPE_COLORS } from "@/lib/type-colors";
+import { POKEMON_TYPE_NAMES } from "@/lib/type-colors";
 import type { usePokemonFilters } from "@/lib/use-pokemon-filters";
+import { TypeBadge } from "../type-badge";
 
 type Filters = ReturnType<typeof usePokemonFilters>;
 
@@ -46,17 +47,15 @@ export function PokemonFilterBar({
       </div>
       <div className="flex flex-wrap gap-1.5">
         {POKEMON_TYPE_NAMES.map((type: TypeName) => (
-          <button
+          <TypeBadge
             key={type}
-            type="button"
+            type={type}
+            size="lg"
             onClick={() => toggleType(type)}
-            className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize text-white transition-opacity ${
+            className={`transition-opacity ${
               selectedTypes.size === 0 || selectedTypes.has(type) ? "opacity-100" : "opacity-40"
             }`}
-            style={{ backgroundColor: TYPE_COLORS[type] }}
-          >
-            {type}
-          </button>
+          />
         ))}
       </div>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">

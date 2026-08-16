@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { requireAdminUserId } from "@/lib/admin";
+import { requireAdminUserId } from "@/server/admin";
 
 type Params = { params: Promise<{ id: string }> };
 

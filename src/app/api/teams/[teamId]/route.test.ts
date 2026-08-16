@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 vi.mock("@/db");
-vi.mock("@/lib/user");
+vi.mock("@/server/user");
 
 import { push, reset } from "@/db";
-import { TEST_USER_ID } from "@/lib/user";
+import { TEST_USER_ID } from "@/server/user";
 import { DELETE, GET, PATCH } from "./route";
 
 const team = {

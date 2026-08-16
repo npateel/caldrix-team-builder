@@ -1,9 +1,7 @@
 import { ArrowDown, ArrowUp, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { highestStatKeys, STAT_KEYS } from "@/lib/pokemon-stats";
-import { TYPE_COLORS } from "@/lib/type-colors";
-import type { PokemonCardData } from "./pokemon-card";
-import { statTotal } from "./pokemon-list";
+import { highestStatKeys, STAT_KEYS, statTotal, type PokemonCardData } from "@/lib/pokemon-stats";
+import { TypeBadge } from "../type-badge";
 
 export type RosterRowLayout = "narrow" | "phone" | "desktop";
 
@@ -25,13 +23,7 @@ function RosterName({ pokemon }: { pokemon: PokemonCardData }) {
       <span className="min-w-0 truncate text-sm font-medium capitalize">{pokemon.name}</span>
       <div className="flex shrink-0 flex-wrap justify-end gap-1">
         {pokemon.types.map((type) => (
-          <span
-            key={type}
-            className="rounded-full px-1.5 py-0.5 text-[9px] font-medium capitalize text-white"
-            style={{ backgroundColor: TYPE_COLORS[type] }}
-          >
-            {type}
-          </span>
+          <TypeBadge key={type} type={type} size="xs" />
         ))}
       </div>
     </div>
