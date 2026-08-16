@@ -2,16 +2,13 @@ import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { teamPokemon, teams } from "@/db/schema";
-import { getRoster } from "@/server/team-roster";
+import { buildRosterRows, getRoster } from "@/server/team-roster";
 import { getOrCreateUserId } from "@/server/user";
 
 const MAX_TEAM_SIZE = 6;
 
 type Params = { params: Promise<{ teamId: string }> };
 
-// Replaces the team's full roster in one call rather than exposing separate
-// add/remove/reorder endpoints -- the client sends the desired ordered list
-// of pokemon ids and this makes it so in one transaction.
 export async function PUT(request: NextRequest, { params }: Params) {
   const { teamId } = await params;
   const userId = await getOrCreateUserId();
@@ -37,18 +34,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
   }
 
   try {
+    const now = new Date();
     await db.transaction(async (tx) => {
       await tx.delete(teamPokemon).where(eq(teamPokemon.teamId, teamId));
       if (pokemonIds.length > 0) {
-        await tx.insert(teamPokemon).values(
-          pokemonIds.map((pokemonId: number, index: number) => ({
-            teamId,
-            pokemonId,
-            position: index,
-          })),
-        );
+        await tx.insert(teamPokemon).values(buildRosterRows(teamId, pokemonIds, now));
       }
-      await tx.update(teams).set({ updatedAt: new Date() }).where(eq(teams.id, teamId));
+      await tx.update(teams).set({ updatedAt: now }).where(eq(teams.id, teamId));
     });
   } catch {
     return NextResponse.json({ error: "One or more pokemonIds do not exist" }, { status: 400 });

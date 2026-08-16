@@ -24,17 +24,20 @@ depend on that user id.
   keeping `teams.user_id` as a real FK from day one (adr-004) -- none of the
   teams/counter-team routes needed to change, only this one helper.
 - On first sign-in, if an anonymous cookie user exists and differs from the
-  newly authenticated user, that anonymous user row is deleted (cascades to
-  their teams) and the cookie is cleared. Anonymous work isn't migrated onto
-  the OAuth account -- it's just dropped.
+  newly authenticated user, that anonymous user's teams are re-pointed onto
+  the OAuth account (`teams.user_id` updated in place -- no uniqueness
+  constraints on that column make this a plain `UPDATE`, not a merge) and
+  the now-team-less anon user row is deleted, in one transaction. The cookie
+  is then cleared. See `src/auth.ts`'s `signIn` event.
 
 ## Alternatives
 
-1. Migrate the anonymous user's teams onto the OAuth account on first login
-   (re-point `teams.user_id`, delete the empty anon row) instead of dropping
-   them -- more considerate of a user's pre-login work, but more logic for a
-   case that's mostly relevant during local testing/demoing, not real usage.
-   Explicitly decided against.
+1. Drop the anonymous user's teams on first login instead of migrating them
+   -- simpler (no transaction, just a delete), but throws away a guest's
+   pre-login work the moment they sign in, which fights against guest mode
+   being a real onramp rather than a throwaway demo mode. Was the original
+   decision here; superseded once guest mode (teams usable without signing
+   in at all, not just mid-OAuth-flow) made losing that work worth avoiding.
 2. Database session strategy instead of JWT -- lets sessions be revoked
    server-side, but requires a DB round trip per request to validate the
    session and needs the `sessions` table actively maintained; JWT is

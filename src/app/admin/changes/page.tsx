@@ -1,4 +1,5 @@
 import { and, desc, eq } from "drizzle-orm";
+import Link from "next/link";
 import { ActionButton } from "@/components/action-button";
 import { db } from "@/db";
 import { changes, pokemon } from "@/db/schema";
@@ -15,16 +16,34 @@ export default async function AdminChangesPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Change log</h1>
-        <ActionButton
-          url="/api/cron/scan-changes"
-          label="Run scan now"
-          pendingLabel="Scanning…"
-          summaryTemplate="Checked {checked}, {changed} changed"
-          errorMessage="Scan failed"
-        />
+        <div className="flex items-center gap-2">
+          <ActionButton
+            url="/api/admin/simulate-change"
+            label="Simulate a change (demo)"
+            pendingLabel="Simulating…"
+            summaryTemplate="Bumped {pokemonName}'s {field} {oldValue} → {newValue} -- run a scan to detect it"
+            errorMessage="Simulate failed"
+          />
+          <ActionButton
+            url="/api/cron/scan-changes"
+            label="Run scan now"
+            pendingLabel="Scanning…"
+            summaryTemplate="Checked {checked}, {changed} changed"
+            errorMessage="Scan failed"
+          />
+        </div>
       </div>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         Only pokemon currently on at least one team are scanned (see adr-006). Showing the most recent 200 changes.
+      </p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        Real PokéAPI data rarely changes day to day -- &quot;Simulate a change&quot; desyncs one of your own team
+        pokemon&apos;s cached stat from its live value so &quot;Run scan now&quot; has something genuine to detect.
+        Check your{" "}
+        <Link href="/" className="underline">
+          home page
+        </Link>{" "}
+        afterward for the resulting alert.
       </p>
 
       {rows.length === 0 ? (

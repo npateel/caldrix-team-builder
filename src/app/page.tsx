@@ -1,33 +1,29 @@
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
-import { auth } from "@/auth";
 import { ActionButton } from "@/components/action-button";
-import { SignInButtons } from "@/components/auth-nav";
 import { CreateTeamButton } from "@/components/teams/create-team-button";
+import { TeamChangeBadge } from "@/components/teams/team-change-badge";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
+import { getRecentTeamChanges, type TeamChangeAlert } from "@/server/team-changes";
 import { getRosters } from "@/server/team-roster";
+import { getUserId } from "@/server/user";
 
 export default async function Home() {
-  const session = await auth();
+  // getUserId (not getOrCreateUserId) since Server Components can't set
+  // the anon cookie mid-render -- a first-time guest just sees an empty
+  // list until CreateTeamButton's POST bootstraps them via the route
+  // handler.
+  const userId = await getUserId();
 
-  if (!session?.user) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
-        <h1 className="text-2xl font-semibold">Sign in to view your teams</h1>
-        <p className="max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-          Build and manage Pokémon teams, saved to your account.
-        </p>
-        <SignInButtons />
-      </div>
-    );
-  }
-
-  const userTeams = await db
-    .select()
-    .from(teams)
-    .where(eq(teams.userId, session.user.id))
-    .orderBy(desc(teams.updatedAt));
+  // Neither of these needs the other, so they run together -- getRosters
+  // below does depend on userTeams' ids, so it has to wait for this pair.
+  const [userTeams, changesByTeam] = await Promise.all([
+    userId
+      ? db.select().from(teams).where(eq(teams.userId, userId)).orderBy(desc(teams.updatedAt))
+      : Promise.resolve([]),
+    userId ? getRecentTeamChanges(userId) : Promise.resolve(new Map<string, TeamChangeAlert[]>()),
+  ]);
   const rosters = await getRosters(userTeams.map((team) => team.id));
 
   return (
@@ -43,6 +39,7 @@ export default async function Home() {
         <ul className="flex flex-col gap-2">
           {userTeams.map((team) => {
             const roster = rosters.get(team.id) ?? [];
+            const changes = changesByTeam.get(team.id) ?? [];
             return (
               <li key={team.id} className="relative">
                 <div className="absolute right-2 top-2 z-10 rounded bg-white/90 px-1.5 py-1 shadow-sm dark:bg-zinc-900/90">
@@ -60,7 +57,10 @@ export default async function Home() {
                   className="flex flex-col gap-3 rounded border border-black/10 p-3 hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:bg-white/5"
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{team.name}</p>
+                    <p className="flex items-center gap-1.5 font-medium">
+                      <span className="truncate">{team.name}</span>
+                      <TeamChangeBadge alerts={changes} />
+                    </p>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {roster.length} pokémon · updated {team.updatedAt.toLocaleDateString()}
                     </p>
