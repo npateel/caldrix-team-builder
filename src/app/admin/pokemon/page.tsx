@@ -1,13 +1,11 @@
-import { asc } from "drizzle-orm";
 import { PokemonBrowser } from "@/components/pokemon/browser";
 import { ActionButton } from "@/components/action-button";
-import { db } from "@/db";
-import { pokemon } from "@/db/schema";
+import { getAllPokemon } from "@/server/pokemon-catalog";
 
 // Reuses the same browser as the public pokedex -- admin's "view" need here
 // is exactly what that already does (search/filter/sort a virtualized list).
 export default async function AdminPokemonPage() {
-  const allPokemon = await db.select().from(pokemon).orderBy(asc(pokemon.id));
+  const allPokemon = await getAllPokemon();
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">

@@ -1,7 +1,9 @@
 import { eq, inArray } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { changes, pokemon, teamPokemon } from "@/db/schema";
 import { transformPokemon, type FreshPokemon } from "@/lib/pokeapi-transform";
+import { POKEMON_CACHE_TAG } from "@/server/pokemon-catalog";
 
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 
@@ -86,6 +88,8 @@ export async function scanForChanges(): Promise<ScanResult> {
       .set({ ...fresh, lastFetchedAt: new Date() })
       .where(eq(pokemon.id, id));
   }
+
+  if (result.changed > 0) revalidateTag(POKEMON_CACHE_TAG, { expire: 0 });
 
   return result;
 }
