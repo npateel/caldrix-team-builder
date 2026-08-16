@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# raw PokéAPI cache -- regenerate with `npm run seed:fetch`, don't check in
+/scripts/data
+
 # next.js
 /.next/
 /out/
