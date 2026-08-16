@@ -57,10 +57,10 @@ export default async function Home() {
                   className="flex flex-col gap-3 rounded border border-black/10 p-3 hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:bg-white/5"
                 >
                   <div className="min-w-0">
-                    <p className="flex items-center gap-1.5 font-medium">
+                    <div className="flex items-center gap-1.5 font-medium">
                       <span className="truncate">{team.name}</span>
                       <TeamChangeBadge alerts={changes} />
-                    </p>
+                    </div>
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">
                       {roster.length} pokémon · updated {team.updatedAt.toLocaleDateString()}
                     </p>

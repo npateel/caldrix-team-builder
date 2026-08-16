@@ -14,7 +14,7 @@ export function CreateTeamButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded bg-black px-3 py-1.5 text-sm text-white dark:bg-white dark:text-black"
+        className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
       >
         Create Team
       </button>
@@ -52,7 +52,7 @@ export function CreateTeamButton() {
       <button
         type="submit"
         disabled={pending}
-        className="rounded bg-black px-3 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
+        className="rounded bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-400"
       >
         {pending ? "Creating…" : "Create"}
       </button>

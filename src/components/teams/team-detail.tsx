@@ -126,7 +126,7 @@ export function TeamDetail({
                 type="button"
                 onClick={() => setTab(t)}
                 className={`flex-1 px-3 py-1.5 capitalize ${
-                  tab === t ? "bg-black text-white dark:bg-white dark:text-black" : ""
+                  tab === t ? "bg-blue-600 text-white dark:bg-blue-500" : ""
                 }`}
               >
                 {t === "team" ? `Team (${roster.length})` : t}
