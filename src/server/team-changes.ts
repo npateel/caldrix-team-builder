@@ -1,0 +1,46 @@
+import { and, desc, eq, gte } from "drizzle-orm";
+import { db } from "@/db";
+import { changes, pokemon, teamPokemon, teams } from "@/db/schema";
+
+const ALERT_WINDOW_DAYS = 7;
+
+export type TeamChangeAlert = {
+  id: string;
+  teamId: string;
+  teamName: string;
+  pokemonId: number;
+  pokemonName: string;
+  field: string;
+  oldValue: string | null;
+  newValue: string | null;
+  detectedAt: Date;
+};
+
+// Task 2's user-facing alert requirement: pokemon-entity changes detected
+// in the last 7 days, scoped to whichever of the user's own teams
+// currently have that pokemon on the roster. One row per (change, team)
+// pair -- if the same pokemon sits on two of the user's teams, that change
+// is relevant to both, so both get their own alert row rather than being
+// collapsed into one.
+export async function getRecentTeamChanges(userId: string): Promise<TeamChangeAlert[]> {
+  const since = new Date(Date.now() - ALERT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+
+  return db
+    .select({
+      id: changes.id,
+      teamId: teams.id,
+      teamName: teams.name,
+      pokemonId: pokemon.id,
+      pokemonName: pokemon.name,
+      field: changes.field,
+      oldValue: changes.oldValue,
+      newValue: changes.newValue,
+      detectedAt: changes.detectedAt,
+    })
+    .from(changes)
+    .innerJoin(pokemon, eq(changes.entityId, pokemon.id))
+    .innerJoin(teamPokemon, eq(teamPokemon.pokemonId, pokemon.id))
+    .innerJoin(teams, eq(teamPokemon.teamId, teams.id))
+    .where(and(eq(changes.entityType, "pokemon"), eq(teams.userId, userId), gte(changes.detectedAt, since)))
+    .orderBy(desc(changes.detectedAt));
+}

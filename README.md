@@ -53,6 +53,13 @@ team are checked against live PokéAPI data (see adr-006 for why).
   locally since the admin "Run scan now" button authenticates via your
   admin session instead.
 
+Signed-in users see their own alert on `/` whenever a pokemon on one of
+their teams changed in the last 7 days (see adr-008). Since real PokéAPI
+data rarely changes day to day, `/admin/changes` also has a "Simulate a
+change (demo)" button that desyncs one of your own team pokemon's cached
+stat from its live value -- click it, then "Run scan now" (the real,
+unmodified scan job), then check `/` for the resulting alert.
+
 ### Daily full cache reseed
 
 `/api/cron/reseed` refetches the *entire* pokemon/moves cache from PokéAPI

@@ -3,9 +3,11 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { ActionButton } from "@/components/action-button";
 import { SignInButtons } from "@/components/auth-nav";
+import { ChangeAlerts } from "@/components/teams/change-alerts";
 import { CreateTeamButton } from "@/components/teams/create-team-button";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
+import { getRecentTeamChanges } from "@/server/team-changes";
 import { getRosters } from "@/server/team-roster";
 
 export default async function Home() {
@@ -28,10 +30,15 @@ export default async function Home() {
     .from(teams)
     .where(eq(teams.userId, session.user.id))
     .orderBy(desc(teams.updatedAt));
-  const rosters = await getRosters(userTeams.map((team) => team.id));
+  const [rosters, changeAlerts] = await Promise.all([
+    getRosters(userTeams.map((team) => team.id)),
+    getRecentTeamChanges(session.user.id),
+  ]);
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
+      <ChangeAlerts alerts={changeAlerts} />
+
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Your teams</h1>
         <CreateTeamButton />
