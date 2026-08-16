@@ -16,7 +16,7 @@ export default async function AdminPokemonPage() {
           label="Reseed cache now"
           pendingLabel="Reseeding… (this takes a while)"
           confirmMessage="Refetch the entire pokemon/moves cache from PokéAPI? This can take a minute or two."
-          summaryTemplate="{pokemon} pokemon, {moves} moves, {pokemonMoveLinks} links"
+          summaryTemplate="{pokemon} pokemon, {moves} moves, {pokemonMoveLinks} links, {changesLogged} team changes logged"
           errorMessage="Reseed failed"
         />
       </div>

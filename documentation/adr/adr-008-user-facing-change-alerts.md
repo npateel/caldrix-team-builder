@@ -34,6 +34,25 @@ so there's no way to trigger a genuine detected change on demand.
   starting discrepancy is artificial. Scoped to the admin's own teams so
   the resulting alert shows up on their own home page immediately.
 
+## Update: reseed was silently erasing undetected changes
+
+Found while using the demo mechanism above: clicking "Reseed cache now"
+(adr-007) instead of "Run scan now" after "Simulate a change" made the
+simulated discrepancy disappear with no alert -- reseed's upsert
+unconditionally overwrites every field with the fresh PokéAPI value,
+including whatever a real change would have left behind, and it never
+touched `changes`. Outside the demo, this meant a genuine change to a team
+pokemon could get silently wiped by reseed (which runs daily) before the
+hourly scan job ever got a chance to detect and log it.
+
+Fix: `diffPokemon` (previously private to scan-changes.ts) moved to
+`src/lib/pokemon-diff.ts` so both jobs use identical change-detection
+logic. `reseed.ts` now has `recordTeamPokemonChanges`, called with the
+freshly-fetched rows *before* the upsert overwrites the cache -- same
+team-pokemon scope as scan-changes.ts (adr-006), reusing the fresh data
+reseed already fetched rather than making its own PokéAPI calls. Both jobs
+now agree: whichever one happens to run first catches the change.
+
 ## Alternatives
 
 1. Insert a fabricated row directly into `changes` for the demo, instead

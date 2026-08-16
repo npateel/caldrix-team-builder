@@ -66,7 +66,11 @@ unmodified scan job), then check `/` for the resulting alert.
 (not just team pokemon like the scan job above) and upserts it -- see
 adr-007. Vercel Cron runs it daily at 3am (`vercel.json`); `/admin/pokemon`
 also has a "Reseed cache now" button for triggering it manually. Same
-`CRON_SECRET`/admin-session auth as the scan route.
+`CRON_SECRET`/admin-session auth as the scan route. It also logs to
+`changes` for whichever pokemon it refetches that happen to be on a team
+(see adr-008's update) -- so either this or "Run scan now" will pick up
+the demo change above; a real change no longer goes undetected just
+because reseed happened to run before the next scan.
 
 This does ~2200 PokéAPI calls and realistically takes a minute or more, so
 `export const maxDuration = 300` is set on the route -- **this needs a

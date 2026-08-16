@@ -2,42 +2,11 @@ import { eq, inArray } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { changes, pokemon, teamPokemon } from "@/db/schema";
-import { transformPokemon, type FreshPokemon } from "@/lib/pokeapi-transform";
+import { diffPokemon, type FieldDiff } from "@/lib/pokemon-diff";
+import { transformPokemon } from "@/lib/pokeapi-transform";
 import { POKEMON_CACHE_TAG } from "@/server/pokemon-catalog";
 
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
-
-type PokemonRow = typeof pokemon.$inferSelect;
-
-const SCALAR_FIELDS = [
-  "name",
-  "spriteUrl",
-  "hp",
-  "attack",
-  "defense",
-  "specialAttack",
-  "specialDefense",
-  "speed",
-] as const;
-
-type FieldDiff = { field: string; oldValue: string; newValue: string };
-
-function diffPokemon(current: PokemonRow, fresh: FreshPokemon): FieldDiff[] {
-  const diffs: FieldDiff[] = [];
-  for (const field of SCALAR_FIELDS) {
-    const oldValue = current[field];
-    const newValue = fresh[field];
-    if (oldValue !== newValue) {
-      diffs.push({ field, oldValue: String(oldValue), newValue: String(newValue) });
-    }
-  }
-  const oldTypes = current.types.join(",");
-  const newTypes = fresh.types.join(",");
-  if (oldTypes !== newTypes) {
-    diffs.push({ field: "types", oldValue: oldTypes, newValue: newTypes });
-  }
-  return diffs;
-}
 
 export type ScanResult = {
   checked: number;
@@ -49,7 +18,9 @@ export type ScanResult = {
 // not the whole ~1300-row cache. See adr-006 for why: this runs inside a
 // request/cron-triggered serverless function, and Task 2 only cares about
 // pokemon actually in use. The full cache is kept fresh separately by the
-// bulk reseed job (src/lib/reseed.ts), which doesn't write to `changes`.
+// bulk reseed job (reseed.ts), which also logs to `changes` for this same
+// team-pokemon subset (see adr-008) so a genuine change can't slip through
+// undetected just because reseed ran before the next scan.
 export async function scanForChanges(): Promise<ScanResult> {
   const teamPokemonIds = await db.selectDistinct({ id: teamPokemon.pokemonId }).from(teamPokemon);
   const result: ScanResult = { checked: 0, changed: 0, changes: [] };

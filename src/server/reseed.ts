@@ -1,9 +1,10 @@
-import { sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
-import { moves, pokemon, pokemonMoves } from "@/db/schema";
+import { changes, moves, pokemon, pokemonMoves, teamPokemon } from "@/db/schema";
 import { fetchJson, pMap } from "@/lib/http";
-import { transformMove, transformPokemon, type FreshMove } from "@/lib/pokeapi-transform";
+import { diffPokemon } from "@/lib/pokemon-diff";
+import { transformMove, transformPokemon, type FreshMove, type FreshPokemon } from "@/lib/pokeapi-transform";
 import { POKEMON_CACHE_TAG } from "@/server/pokemon-catalog";
 
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
@@ -24,13 +25,53 @@ export type ReseedResult = {
   pokemon: number;
   moves: number;
   pokemonMoveLinks: number;
+  changesLogged: number;
 };
 
-// Full bulk refresh of the pokemon/moves cache, live from PokéAPI -- unlike
-// scan-changes.ts (team-scoped, writes to `changes`), this refreshes
-// everything and doesn't touch the change log; the two jobs together are
-// what adr-004 originally described as one. See adr-007 for why this is a
-// separate job, and its serverless timing/memory tradeoffs.
+// Same scope as scan-changes.ts (pokemon currently on at least one team,
+// see adr-006) and the same diffPokemon used there -- reseed already has
+// fresh data for every pokemon in hand from the bulk fetch below, so this
+// just needs the pre-overwrite cached rows to diff against. Without this,
+// reseed's blind upsert would silently erase a real discrepancy the scan
+// job would otherwise have caught and logged -- see adr-008.
+export async function recordTeamPokemonChanges(freshRows: FreshPokemon[]): Promise<number> {
+  const teamPokemonIds = await db.selectDistinct({ id: teamPokemon.pokemonId }).from(teamPokemon);
+  if (teamPokemonIds.length === 0) return 0;
+
+  const ids = new Set(teamPokemonIds.map((row) => row.id));
+  const relevantFresh = freshRows.filter((row) => ids.has(row.id));
+  if (relevantFresh.length === 0) return 0;
+
+  const currentRows = await db.select().from(pokemon).where(inArray(pokemon.id, [...ids]));
+  const currentById = new Map(currentRows.map((row) => [row.id, row]));
+
+  const changeRows = relevantFresh.flatMap((fresh) => {
+    const current = currentById.get(fresh.id);
+    if (!current) return [];
+    return diffPokemon(current, fresh).map((diff) => ({
+      entityType: "pokemon" as const,
+      entityId: fresh.id,
+      field: diff.field,
+      oldValue: diff.oldValue,
+      newValue: diff.newValue,
+    }));
+  });
+  if (changeRows.length === 0) return 0;
+
+  for (const batch of chunk(changeRows, BATCH_SIZE)) {
+    await db.insert(changes).values(batch);
+  }
+  return changeRows.length;
+}
+
+// Full bulk refresh of the pokemon/moves cache, live from PokéAPI. Unlike
+// scan-changes.ts, this refreshes everything, not just team pokemon -- but
+// it also logs to `changes` for the team-pokemon subset
+// (recordTeamPokemonChanges above), so a genuine change doesn't go
+// undetected just because reseed happened to run before the next scan.
+// The two jobs together are what adr-004 originally described as one. See
+// adr-007 for why this is a separate job, and its serverless
+// timing/memory tradeoffs.
 export async function reseed(): Promise<ReseedResult> {
   const [pokemonList, moveList] = await Promise.all([
     fetchJson<{ results: NamedApiResource[] }>(`${POKEAPI_BASE}/pokemon?limit=100000`),
@@ -50,6 +91,10 @@ export async function reseed(): Promise<ReseedResult> {
     CONCURRENCY,
   );
   const moveRows = moveDetails.map(transformMove).filter((move): move is FreshMove => move !== null);
+
+  // Must run before the upsert below overwrites the rows it needs to diff
+  // against.
+  const changesLogged = await recordTeamPokemonChanges(pokemonRows);
 
   for (const batch of chunk(pokemonRows, BATCH_SIZE)) {
     await db
@@ -107,5 +152,5 @@ export async function reseed(): Promise<ReseedResult> {
 
   revalidateTag(POKEMON_CACHE_TAG, { expire: 0 });
 
-  return { pokemon: pokemonRows.length, moves: moveRows.length, pokemonMoveLinks: linkRows.length };
+  return { pokemon: pokemonRows.length, moves: moveRows.length, pokemonMoveLinks: linkRows.length, changesLogged };
 }
