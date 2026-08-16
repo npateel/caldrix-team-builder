@@ -20,14 +20,22 @@ so there's no way to trigger a genuine detected change on demand.
   of a user's teams, both get their own alert.
 - `src/components/teams/team-change-badge.tsx`: a small warning icon next
   to each team's name on the home page (`/`), shown only for teams with
-  recent changes. Hovering shows a short "click for details" prompt;
-  clicking opens a `<dialog>` with the actual detail -- one old/new table
-  per changed pokemon, old on the left and new on the right. Nested inside
-  the team card's own link, so the trigger is a `role="button"` span (a
-  real `<button>` nested inside an `<a>` behaves badly) with
-  `stopPropagation`/`preventDefault` so clicking it opens the dialog
-  instead of navigating the card, plus its own keydown handling since a
-  non-native button doesn't get Enter/Space activation for free. No
+  recent changes. Hovering (or focusing, for keyboard users) reveals a
+  popover with a "View details" link; clicking it -- or the icon itself,
+  which stays independently clickable as the keyboard/touch fallback --
+  opens a `<dialog>`, centered on screen, with the actual detail: one
+  old/new table per changed pokemon, old on the left and new on the right.
+  The popover isn't `pointer-events-none` like a plain tooltip -- it needs
+  to stay open while the mouse travels from the icon onto the link inside
+  it, which works because CSS keeps an element's `:hover` state active for
+  as long as the pointer is over it or any pointer-events-enabled
+  descendant, regardless of that descendant's own position. Both the icon
+  and the inner link are nested inside the team card's own link, so both
+  are `role="button"` spans (a real `<button>` nested inside an `<a>`
+  behaves badly) with `stopPropagation`/`preventDefault` so clicking
+  either opens the dialog instead of navigating the card, plus their own
+  keydown handling since a non-native button doesn't get Enter/Space
+  activation for free. No
   read/dismissed state -- `changes` has nowhere to track that per-user,
   and the 7-day window already rolls entries off on its own. No separate
   mobile handling needed: touch has no hover, so the prompt just never

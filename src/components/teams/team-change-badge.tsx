@@ -8,20 +8,27 @@ import type { TeamChangeAlert } from "@/server/team-changes";
 // Task 2's user-facing alert, scoped to one team -- a small warning icon
 // next to the team name (rather than one banner listing every team's
 // changes at once, which doesn't scale once several teams have several
-// changes each). Hovering shows a short prompt; clicking opens a dialog
-// with the actual old-vs-new detail. Nested inside the team card's own
-// `<Link>`, so the trigger is a `role="button"` span (not a real
-// `<button>`, which browsers handle badly nested inside an `<a>`) with
-// stopPropagation/preventDefault so clicking it opens the dialog instead
-// of navigating, plus its own keydown handling for Enter/Space since
-// non-native buttons don't get that for free. The `<dialog>` itself
-// renders in the browser's top layer regardless of where it sits in the
-// DOM, so nesting it inside the anchor doesn't affect its own layout.
+// changes each). Hovering (or focusing, for keyboard users) reveals a
+// small popover with a "View details" link; clicking it opens a dialog,
+// centered on screen, with the actual old-vs-new detail.
 //
-// No separate mobile treatment needed: touch has no hover, so the CSS
-// hover prompt simply never appears there -- a tap goes straight to
-// the click handler and opens the dialog, which is the natural touch
-// equivalent of "hover, then click" on desktop.
+// The popover is deliberately *not* pointer-events-none like a plain
+// tooltip -- it needs to stay open while the mouse travels from the icon
+// onto the link inside it. CSS keeps `group-hover/badge` active for as
+// long as the pointer is over the icon OR any descendant (the popover
+// included) that can receive pointer events, regardless of the
+// popover's own position, so this "hover, then move onto the popover
+// itself" works without any JS.
+//
+// Both the icon and the inner link are nested inside the team card's own
+// `<Link>`, so both are `role="button"` spans (not real `<button>`s,
+// which browsers handle badly nested inside an `<a>`) with
+// stopPropagation/preventDefault so clicking either opens the dialog
+// instead of navigating the card, plus their own keydown handling since
+// non-native buttons don't get Enter/Space activation for free. The icon
+// itself stays independently clickable (not just the link) since it's
+// the only thing reachable without hover -- the necessary fallback for
+// keyboard and touch, where there's no "hover the icon" step at all.
 export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const changes = consolidateTeamChanges(alerts);
@@ -56,15 +63,24 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
         className="group/badge relative inline-flex shrink-0 cursor-pointer outline-none"
       >
         <TriangleAlert size={14} className="text-amber-600 dark:text-amber-400" />
-        <span className="pointer-events-none absolute left-full top-1/2 z-20 ml-1.5 hidden w-56 -translate-y-1/2 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-left text-xs normal-case text-amber-900 shadow-lg group-hover/badge:block dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
-          Pokémon on your team have changed. Click for more details.
+        <span className="absolute left-full top-1/2 z-20 ml-1.5 hidden w-56 -translate-y-1/2 flex-col gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-left text-xs normal-case text-amber-900 shadow-lg group-hover/badge:flex group-focus-visible/badge:flex dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          <span>Pokémon on your team have changed.</span>
+          <span
+            role="button"
+            tabIndex={0}
+            onClick={openDialog}
+            onKeyDown={handleKeyDown}
+            className="w-fit cursor-pointer font-medium text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            View details
+          </span>
         </span>
       </span>
 
       <dialog
         ref={dialogRef}
         onClick={closeOnBackdropClick}
-        className="w-full max-w-md rounded-lg border border-black/10 bg-white p-0 text-black normal-case backdrop:bg-black/40 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
+        className="fixed inset-0 m-auto w-full max-w-md rounded-lg border border-black/10 bg-white p-0 text-black normal-case backdrop:bg-black/40 dark:border-white/10 dark:bg-zinc-900 dark:text-white"
       >
         <div className="flex flex-col gap-3 p-4">
           <div className="flex items-center justify-between">
