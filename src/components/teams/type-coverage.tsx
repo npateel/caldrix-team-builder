@@ -1,6 +1,7 @@
 import { defensiveCoverage, offensiveCoverage } from "@/lib/team-coverage";
-import { POKEMON_TYPE_NAMES, TYPE_COLORS } from "@/lib/type-colors";
+import { POKEMON_TYPE_NAMES } from "@/lib/type-colors";
 import type { RosterEntry } from "@/server/team-roster";
+import { TypeBadge } from "../type-badge";
 
 export function TeamTypeCoverage({ roster }: { roster: RosterEntry[] }) {
   if (roster.length === 0) {
@@ -20,12 +21,7 @@ export function TeamTypeCoverage({ roster }: { roster: RosterEntry[] }) {
         <div className="flex flex-col gap-1.5">
           {defensive.map((row) => (
             <div key={row.type} className="flex items-center gap-3 text-xs">
-              <span
-                className="w-20 shrink-0 rounded-full px-2 py-0.5 text-center font-medium capitalize text-white"
-                style={{ backgroundColor: TYPE_COLORS[row.type] }}
-              >
-                {row.type}
-              </span>
+              <TypeBadge type={row.type} size="md" className="w-20 shrink-0 text-center" />
               <Dots count={row.weak} colorClass="bg-red-500" label="weak" />
               <Dots count={row.resist} colorClass="bg-emerald-500" label="resist" />
               <Dots count={row.immune} colorClass="bg-blue-500" label="immune" />
@@ -40,15 +36,7 @@ export function TeamTypeCoverage({ roster }: { roster: RosterEntry[] }) {
         </h3>
         <div className="flex flex-wrap gap-1.5">
           {POKEMON_TYPE_NAMES.map((type) => (
-            <span
-              key={type}
-              className={`rounded-full px-2.5 py-1 text-xs font-medium capitalize text-white ${
-                covered.has(type) ? "" : "opacity-25"
-              }`}
-              style={{ backgroundColor: TYPE_COLORS[type] }}
-            >
-              {type}
-            </span>
+            <TypeBadge key={type} type={type} size="lg" className={covered.has(type) ? "" : "opacity-25"} />
           ))}
         </div>
       </div>

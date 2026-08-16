@@ -2,8 +2,8 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef } from "react";
-import { TYPE_COLORS } from "@/lib/type-colors";
 import { useContainerWidth } from "@/lib/use-container-width";
+import { TypeBadge } from "../type-badge";
 import {
   highestStatKeys,
   STAT_KEYS,
@@ -185,13 +185,7 @@ function TypeBadges({ types }: { types: PokemonCardData["types"] }) {
   return (
     <div className="flex flex-wrap gap-1">
       {types.map((type) => (
-        <span
-          key={type}
-          className="rounded-full px-2 py-0.5 text-[10px] font-medium capitalize text-white"
-          style={{ backgroundColor: TYPE_COLORS[type] }}
-        >
-          {type}
-        </span>
+        <TypeBadge key={type} type={type} />
       ))}
     </div>
   );

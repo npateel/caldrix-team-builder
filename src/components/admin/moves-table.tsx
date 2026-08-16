@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { TypeName } from "@/lib/type-chart";
-import { TYPE_COLORS } from "@/lib/type-colors";
+import { TypeBadge } from "../type-badge";
 
 export type MoveRow = {
   id: number;
@@ -49,12 +49,7 @@ export function AdminMovesTable({ moves }: { moves: MoveRow[] }) {
               <tr key={move.id} className="border-b border-black/5 dark:border-white/5">
                 <td className="py-1.5 pr-4 capitalize">{move.name}</td>
                 <td className="py-1.5 pr-4">
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium capitalize text-white"
-                    style={{ backgroundColor: TYPE_COLORS[move.type] }}
-                  >
-                    {move.type}
-                  </span>
+                  <TypeBadge type={move.type} />
                 </td>
                 <td className="py-1.5 pr-4 capitalize">{move.damageClass}</td>
                 <td className="py-1.5 pr-4">{move.power ?? "—"}</td>

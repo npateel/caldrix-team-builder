@@ -1,5 +1,5 @@
-import { TYPE_COLORS } from "@/lib/type-colors";
 import { highestStatKeys, type PokemonCardData, type StatKey } from "@/lib/pokemon-stats";
+import { TypeBadge } from "../type-badge";
 
 const STATS: { key: StatKey; label: string }[] = [
   { key: "hp", label: "HP" },
@@ -60,13 +60,7 @@ export function PokemonCard({
       <span className="text-center text-sm font-medium capitalize">{pokemon.name}</span>
       <div className="flex flex-wrap justify-center gap-1">
         {pokemon.types.map((type) => (
-          <span
-            key={type}
-            className="rounded-full px-2 py-0.5 text-[10px] font-medium capitalize text-white"
-            style={{ backgroundColor: TYPE_COLORS[type] }}
-          >
-            {type}
-          </span>
+          <TypeBadge key={type} type={type} />
         ))}
       </div>
       <dl className="grid w-full grid-cols-3 gap-x-2 gap-y-1.5 text-[10px] text-zinc-500 dark:text-zinc-400">
