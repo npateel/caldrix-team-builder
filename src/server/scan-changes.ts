@@ -1,10 +1,11 @@
 import { eq, inArray } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
-import { changes, pokemon, teamPokemon } from "@/db/schema";
+import { changes, pokemon } from "@/db/schema";
 import { diffPokemon, type FieldDiff } from "@/lib/pokemon-diff";
 import { transformPokemon } from "@/lib/pokeapi-transform";
 import { POKEMON_CACHE_TAG } from "@/server/pokemon-catalog";
+import { getTeamPokemonIds } from "@/server/team-roster";
 
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 
@@ -22,11 +23,10 @@ export type ScanResult = {
 // team-pokemon subset (see adr-008) so a genuine change can't slip through
 // undetected just because reseed ran before the next scan.
 export async function scanForChanges(): Promise<ScanResult> {
-  const teamPokemonIds = await db.selectDistinct({ id: teamPokemon.pokemonId }).from(teamPokemon);
+  const ids = await getTeamPokemonIds();
   const result: ScanResult = { checked: 0, changed: 0, changes: [] };
-  if (teamPokemonIds.length === 0) return result;
+  if (ids.length === 0) return result;
 
-  const ids = teamPokemonIds.map((row) => row.id);
   const currentRows = await db.select().from(pokemon).where(inArray(pokemon.id, ids));
   const currentById = new Map(currentRows.map((row) => [row.id, row]));
 

@@ -1,39 +1,30 @@
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
-import { auth } from "@/auth";
 import { ActionButton } from "@/components/action-button";
-import { SignInButtons } from "@/components/auth-nav";
 import { CreateTeamButton } from "@/components/teams/create-team-button";
 import { TeamChangeBadge } from "@/components/teams/team-change-badge";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
-import { getRecentTeamChanges } from "@/server/team-changes";
+import { getRecentTeamChanges, type TeamChangeAlert } from "@/server/team-changes";
 import { getRosters } from "@/server/team-roster";
+import { getUserId } from "@/server/user";
 
 export default async function Home() {
-  const session = await auth();
+  // getUserId (not getOrCreateUserId) since Server Components can't set
+  // the anon cookie mid-render -- a first-time guest just sees an empty
+  // list until CreateTeamButton's POST bootstraps them via the route
+  // handler.
+  const userId = await getUserId();
 
-  if (!session?.user) {
-    return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4 text-center">
-        <h1 className="text-2xl font-semibold">Sign in to view your teams</h1>
-        <p className="max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-          Build and manage Pokémon teams, saved to your account.
-        </p>
-        <SignInButtons />
-      </div>
-    );
-  }
-
-  const userTeams = await db
-    .select()
-    .from(teams)
-    .where(eq(teams.userId, session.user.id))
-    .orderBy(desc(teams.updatedAt));
-  const [rosters, changesByTeam] = await Promise.all([
-    getRosters(userTeams.map((team) => team.id)),
-    getRecentTeamChanges(session.user.id),
+  // Neither of these needs the other, so they run together -- getRosters
+  // below does depend on userTeams' ids, so it has to wait for this pair.
+  const [userTeams, changesByTeam] = await Promise.all([
+    userId
+      ? db.select().from(teams).where(eq(teams.userId, userId)).orderBy(desc(teams.updatedAt))
+      : Promise.resolve([]),
+    userId ? getRecentTeamChanges(userId) : Promise.resolve(new Map<string, TeamChangeAlert[]>()),
   ]);
+  const rosters = await getRosters(userTeams.map((team) => team.id));
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">

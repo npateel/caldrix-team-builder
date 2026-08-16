@@ -8,9 +8,26 @@ import type { TeamChangeAlert } from "@/server/team-changes";
 // Task 2's user-facing alert, scoped to one team -- a small warning icon
 // next to the team name (rather than one banner listing every team's
 // changes at once, which doesn't scale once several teams have several
-// changes each). Hovering (or focusing, for keyboard users) reveals a
-// small popover with a "View details" link; clicking it opens a dialog,
-// centered on screen, with the actual old-vs-new detail.
+// changes each). On devices that actually support hovering, hovering (or
+// focusing, for keyboard users) reveals a small popover with a "View
+// details" link; clicking it opens a dialog, centered on screen, with the
+// actual old-vs-new detail.
+//
+// The popover only ever shows for real hover, gated behind
+// `@media (hover: hover)` (focus-visible is left ungated -- keyboard
+// access shouldn't depend on pointer capability). Touch has no hover, so
+// on a touch device the popover step is skipped entirely and a tap on the
+// icon goes straight through its onClick to open the dialog directly.
+// This isn't just "no separate mobile handling needed" the way it first
+// looked -- plain `:hover` (not gated) gets *simulated* by mobile
+// browsers on a first tap, which would eat that tap to reveal the
+// popover instead of firing the click, requiring a second tap to
+// actually open the dialog. The `(hover: hover)` gate is what prevents
+// that: on a real touch device the popover styles never apply, so
+// there's no simulated-hover state to consume the tap in the first
+// place. The icon's own tap target is also padded well past its 14px
+// glyph size, since a target that small is hard to hit reliably with a
+// finger.
 //
 // The popover is deliberately *not* pointer-events-none like a plain
 // tooltip -- it needs to stay open while the mouse travels from the icon
@@ -73,24 +90,23 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
     closeDialog(e);
   }
 
+  // Both the icon and the "View details" link open the dialog the same
+  // way -- shared here so there's one place to update if a third trigger
+  // (or a new handler) is ever added.
+  const triggerProps = { role: "button" as const, tabIndex: 0, onClick: openDialog, onKeyDown: handleKeyDown };
+
   return (
     <>
       <span
-        role="button"
-        tabIndex={0}
-        onClick={openDialog}
-        onKeyDown={handleKeyDown}
+        {...triggerProps}
         aria-label="Pokémon on your team have changed. Click for more details."
-        className="group/badge relative inline-flex shrink-0 cursor-pointer outline-none"
+        className="group/badge relative inline-flex shrink-0 cursor-pointer p-1.5 outline-none"
       >
         <TriangleAlert size={14} className="text-amber-600 dark:text-amber-400" />
-        <span className="absolute left-full top-1/2 z-20 hidden w-56 -translate-y-1/2 flex-col gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-left text-xs normal-case text-amber-900 shadow-lg group-hover/badge:flex group-focus-visible/badge:flex dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <span className="absolute left-full top-1/2 z-20 hidden w-56 -translate-y-1/2 flex-col gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-left text-xs normal-case text-amber-900 shadow-lg [@media(hover:hover)]:group-hover/badge:flex group-focus-visible/badge:flex dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
           <span>Pokémon on your team have changed.</span>
           <span
-            role="button"
-            tabIndex={0}
-            onClick={openDialog}
-            onKeyDown={handleKeyDown}
+            {...triggerProps}
             className="w-fit cursor-pointer font-medium text-blue-600 underline hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
           >
             View details
@@ -125,6 +141,7 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
                       <th className="pb-1 text-left font-medium">Field</th>
                       <th className="pb-1 text-left font-medium">Old</th>
                       <th className="pb-1 text-left font-medium">New</th>
+                      <th className="pb-1 text-left font-medium">Detected</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -132,7 +149,8 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
                       <tr key={f.field} className="border-t border-black/5 dark:border-white/5">
                         <td className="py-1 pr-3 capitalize">{f.field}</td>
                         <td className="py-1 pr-3 text-zinc-500 dark:text-zinc-400">{f.oldValue}</td>
-                        <td className="py-1 font-medium">{f.newValue}</td>
+                        <td className="py-1 pr-3 font-medium">{f.newValue}</td>
+                        <td className="py-1 text-zinc-500 dark:text-zinc-400">{f.detectedAt.toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>

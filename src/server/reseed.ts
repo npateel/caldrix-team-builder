@@ -1,4 +1,4 @@
-import { inArray, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { changes, moves, pokemon, pokemonMoves, teamPokemon } from "@/db/schema";
@@ -35,15 +35,15 @@ export type ReseedResult = {
 // reseed's blind upsert would silently erase a real discrepancy the scan
 // job would otherwise have caught and logged -- see adr-008.
 export async function recordTeamPokemonChanges(freshRows: FreshPokemon[]): Promise<number> {
-  const teamPokemonIds = await db.selectDistinct({ id: teamPokemon.pokemonId }).from(teamPokemon);
-  if (teamPokemonIds.length === 0) return 0;
+  const rows = await db
+    .selectDistinct({ pokemon })
+    .from(pokemon)
+    .innerJoin(teamPokemon, eq(pokemon.id, teamPokemon.pokemonId));
+  if (rows.length === 0) return 0;
 
-  const ids = new Set(teamPokemonIds.map((row) => row.id));
-  const relevantFresh = freshRows.filter((row) => ids.has(row.id));
+  const currentById = new Map(rows.map((row) => [row.pokemon.id, row.pokemon]));
+  const relevantFresh = freshRows.filter((row) => currentById.has(row.id));
   if (relevantFresh.length === 0) return 0;
-
-  const currentRows = await db.select().from(pokemon).where(inArray(pokemon.id, [...ids]));
-  const currentById = new Map(currentRows.map((row) => [row.id, row]));
 
   const changeRows = relevantFresh.flatMap((fresh) => {
     const current = currentById.get(fresh.id);

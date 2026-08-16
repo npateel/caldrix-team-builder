@@ -1,13 +1,12 @@
 import { and, desc, eq, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { changes, pokemon, teamPokemon, teams } from "@/db/schema";
+import { groupBy } from "@/lib/group-by";
 
 const ALERT_WINDOW_DAYS = 7;
 
 export type TeamChangeAlert = {
-  id: string;
   teamId: string;
-  teamName: string;
   pokemonId: number;
   pokemonName: string;
   field: string;
@@ -32,9 +31,7 @@ export async function getRecentTeamChanges(userId: string): Promise<Map<string, 
 
   const rows = await db
     .select({
-      id: changes.id,
       teamId: teams.id,
-      teamName: teams.name,
       pokemonId: pokemon.id,
       pokemonName: pokemon.name,
       field: changes.field,
@@ -56,11 +53,5 @@ export async function getRecentTeamChanges(userId: string): Promise<Map<string, 
     )
     .orderBy(desc(changes.detectedAt));
 
-  const byTeam = new Map<string, TeamChangeAlert[]>();
-  for (const row of rows) {
-    const existing = byTeam.get(row.teamId);
-    if (existing) existing.push(row);
-    else byTeam.set(row.teamId, [row]);
-  }
-  return byTeam;
+  return groupBy(rows, (row) => row.teamId);
 }

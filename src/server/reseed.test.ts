@@ -31,7 +31,7 @@ beforeEach(() => reset());
 
 describe("recordTeamPokemonChanges", () => {
   it("logs nothing when no pokemon are on any team", async () => {
-    push([]); // selectDistinct teamPokemon
+    push([]); // joined selectDistinct
 
     expect(await recordTeamPokemonChanges([fresh()])).toBe(0);
     // No further db calls pushed -- would throw "no queued result" if the
@@ -39,21 +39,19 @@ describe("recordTeamPokemonChanges", () => {
   });
 
   it("logs nothing when none of the freshly fetched rows are team pokemon", async () => {
-    push([{ id: 999 }]); // selectDistinct teamPokemon -- not id 1
+    push([{ pokemon: currentRow({ id: 999 }) }]); // joined selectDistinct -- not id 1
 
     expect(await recordTeamPokemonChanges([fresh({ id: 1 })])).toBe(0);
   });
 
   it("logs nothing when a team pokemon's data didn't actually change", async () => {
-    push([{ id: 1 }]); // selectDistinct teamPokemon
-    push([currentRow()]); // current pokemon rows
+    push([{ pokemon: currentRow() }]); // joined selectDistinct
 
     expect(await recordTeamPokemonChanges([fresh()])).toBe(0);
   });
 
   it("logs one row per changed field for a team pokemon that did change", async () => {
-    push([{ id: 1 }]); // selectDistinct teamPokemon
-    push([currentRow({ attack: 49, hp: 45 })]); // current pokemon rows
+    push([{ pokemon: currentRow({ attack: 49, hp: 45 }) }]); // joined selectDistinct
     push(undefined); // changes insert
 
     const count = await recordTeamPokemonChanges([fresh({ attack: 55, hp: 50 })]);

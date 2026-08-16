@@ -42,7 +42,6 @@ describe("PUT /api/teams/[teamId]/pokemon", () => {
 
   it("replaces the roster and returns it", async () => {
     push([{ id: "team-1" }]); // ownership select
-    push([]); // tx: existing addedAt select
     push(undefined); // tx.delete
     push(undefined); // tx.insert
     push(undefined); // tx.update (teams.updatedAt)
@@ -57,7 +56,6 @@ describe("PUT /api/teams/[teamId]/pokemon", () => {
 
   it("clears the roster when given an empty list, skipping the insert", async () => {
     push([{ id: "team-1" }]); // ownership select
-    push([]); // tx: existing addedAt select
     push(undefined); // tx.delete
     push(undefined); // tx.update (teams.updatedAt) -- no tx.insert since pokemonIds is empty
     push([]); // roster join
@@ -71,7 +69,6 @@ describe("PUT /api/teams/[teamId]/pokemon", () => {
 
   it("returns 400 when a pokemonId doesn't exist (simulated FK violation)", async () => {
     push([{ id: "team-1" }]); // ownership select
-    push([]); // tx: existing addedAt select
     push(undefined); // tx.delete
     push(new Error("insert or update on table violates foreign key constraint")); // tx.insert fails
 

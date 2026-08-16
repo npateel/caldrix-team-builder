@@ -18,14 +18,14 @@ describe("getRecentTeamChanges", () => {
 
   it("groups joined rows by team id", async () => {
     push([
-      { id: "c1", teamId: "t1", teamName: "Team One", pokemonId: 1, pokemonName: "bulbasaur", field: "attack" },
-      { id: "c2", teamId: "t1", teamName: "Team One", pokemonId: 4, pokemonName: "charmander", field: "hp" },
-      { id: "c3", teamId: "t2", teamName: "Team Two", pokemonId: 7, pokemonName: "squirtle", field: "speed" },
+      { teamId: "t1", pokemonId: 1, pokemonName: "bulbasaur", field: "attack" },
+      { teamId: "t1", pokemonId: 4, pokemonName: "charmander", field: "hp" },
+      { teamId: "t2", pokemonId: 7, pokemonName: "squirtle", field: "speed" },
     ]);
 
     const result = await getRecentTeamChanges("user-1");
 
-    expect(result.get("t1")?.map((c) => c.id)).toEqual(["c1", "c2"]);
-    expect(result.get("t2")?.map((c) => c.id)).toEqual(["c3"]);
+    expect(result.get("t1")?.map((c) => c.pokemonId)).toEqual([1, 4]);
+    expect(result.get("t2")?.map((c) => c.pokemonId)).toEqual([7]);
   });
 });
