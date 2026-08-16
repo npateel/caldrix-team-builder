@@ -10,15 +10,11 @@ export type SimulatedDrift = {
   newValue: number;
 };
 
-// Demo-only aid for Task 2: real PokéAPI data essentially never changes
-// day to day, so there's no way to demo the scan job detecting a *real*
-// upstream change on demand. Instead, this deliberately desyncs one of the
-// admin's own team pokemon's cached `attack` from its live PokéAPI value.
-// The actual scan job (scan-changes.ts) is otherwise untouched -- run it
-// after this and it does its normal job: fetch live data, find the (now
-// real) discrepancy between cache and source, log it to `changes`, and
-// write the cache back to the true value. Scoped to the admin's own teams
-// so the resulting alert shows up on their own home page immediately.
+// Demo-only aid for Task 2: real PokéAPI data rarely changes day to day,
+// so this desyncs one of the admin's own team pokemon's cached `attack`
+// to give the (otherwise untouched) scan job a real discrepancy to find
+// on demand. Scoped to the admin's own teams so the resulting alert shows
+// up on their own home page.
 export async function simulateStatDrift(userId: string): Promise<SimulatedDrift | null> {
   const [row] = await db
     .select({ id: pokemon.id, name: pokemon.name, attack: pokemon.attack })
