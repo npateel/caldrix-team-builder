@@ -6,9 +6,10 @@ import type { TeamChangeAlert } from "@/server/team-changes";
 // next to the team name (rather than one banner listing every team's
 // changes at once, which doesn't scale once several teams have several
 // changes each) whose hover/focus tooltip lists what changed. Pure CSS
-// (group-hover/group-focus), no client JS needed. `title` is a plain-text
-// fallback for anywhere the styled tooltip doesn't apply (e.g. some
-// screen readers, long-press on mobile).
+// (group-hover/group-focus), no client JS needed. No `title` attribute --
+// that draws the browser's own native tooltip on top of this one after its
+// hover delay, so `aria-label` alone carries the accessible fallback text
+// without also rendering a second, plain-text tooltip.
 export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
   if (alerts.length === 0) return null;
 
@@ -20,7 +21,6 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
   return (
     <span
       tabIndex={0}
-      title={summary}
       aria-label={`${events.length === 1 ? "1 pokémon" : `${events.length} pokémon`} changed recently: ${summary}`}
       className="group/badge relative inline-flex shrink-0 outline-none"
     >
