@@ -59,7 +59,14 @@ export function PokemonCard({
         // plain img is simpler here than configuring next/image remote
         // patterns for a domain we don't otherwise need.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={pokemon.spriteUrl} alt={pokemon.name} width={72} height={72} loading="lazy" />
+        <img
+          src={pokemon.spriteUrl}
+          alt={pokemon.name}
+          width={72}
+          height={72}
+          loading="lazy"
+          className="scale-110"
+        />
       ) : (
         <div className="h-[72px] w-[72px]" />
       )}

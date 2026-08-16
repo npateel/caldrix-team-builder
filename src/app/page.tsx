@@ -76,6 +76,7 @@ export default async function Home() {
                             alt={entry.pokemon.name}
                             width={56}
                             height={56}
+                            className="scale-110"
                           />
                         ) : (
                           <div key={entry.pokemon.id} className="h-14 w-14" />

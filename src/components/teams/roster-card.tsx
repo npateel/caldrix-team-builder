@@ -73,7 +73,7 @@ export function RosterCard({
   const statGap = layout === "desktop" ? "gap-4" : "gap-2";
   const sprite = pokemon.spriteUrl ? (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={pokemon.spriteUrl} alt={pokemon.name} width={32} height={32} className="shrink-0" />
+    <img src={pokemon.spriteUrl} alt={pokemon.name} width={32} height={32} className="shrink-0 scale-110" />
   ) : (
     <div className="h-8 w-8 shrink-0" />
   );
