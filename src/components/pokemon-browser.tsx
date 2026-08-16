@@ -1,7 +1,7 @@
 "use client";
 
+import type { PokemonCardData } from "@/lib/pokemon-stats";
 import { usePokemonFilters } from "@/lib/use-pokemon-filters";
-import type { PokemonCardData } from "./pokemon-card";
 import { PokemonFilterBar } from "./pokemon-filter-bar";
 import { PokemonGrid } from "./pokemon-grid";
 import { PokemonList } from "./pokemon-list";

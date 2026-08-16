@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
-import type { TypeName } from "@/lib/type-chart";
-import type { PokemonCardData } from "@/components/pokemon-card";
-import { statTotal, type SortDirection, type SortKey } from "@/components/pokemon-list";
+import type { TypeName } from "./type-chart";
+import { statTotal, type PokemonCardData, type SortDirection, type SortKey } from "./pokemon-stats";
 
 export type View = "grid" | "list";
 

@@ -1,9 +1,7 @@
 import { ArrowDown, ArrowUp, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { highestStatKeys, STAT_KEYS } from "@/lib/pokemon-stats";
+import { highestStatKeys, STAT_KEYS, statTotal, type PokemonCardData } from "@/lib/pokemon-stats";
 import { TYPE_COLORS } from "@/lib/type-colors";
-import type { PokemonCardData } from "./pokemon-card";
-import { statTotal } from "./pokemon-list";
 
 export type RosterRowLayout = "narrow" | "phone" | "desktop";
 

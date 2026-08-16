@@ -3,12 +3,15 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useRef, useState } from "react";
 import { TYPE_COLORS } from "@/lib/type-colors";
-import { highestStatKeys, STAT_KEYS } from "@/lib/pokemon-stats";
-import type { PokemonCardData } from "./pokemon-card";
-
-export type StatSortKey = "hp" | "attack" | "defense" | "specialAttack" | "specialDefense" | "speed" | "total";
-export type SortKey = "id" | "name" | StatSortKey;
-export type SortDirection = "asc" | "desc";
+import {
+  highestStatKeys,
+  STAT_KEYS,
+  statTotal,
+  type PokemonCardData,
+  type SortDirection,
+  type SortKey,
+  type StatSortKey,
+} from "@/lib/pokemon-stats";
 
 const STAT_COLUMNS: { key: StatSortKey; label: string }[] = [
   { key: "hp", label: "HP" },
@@ -30,10 +33,6 @@ export const FULL_TABLE_MAX_WIDTH = 920;
 const COMPACT_TABLE_WIDTH = 720;
 const LAYOUT_BREAKPOINT = 860;
 const ROW_HEIGHT_ESTIMATE = 56;
-
-export function statTotal(p: PokemonCardData): number {
-  return p.hp + p.attack + p.defense + p.specialAttack + p.specialDefense + p.speed;
-}
 
 export function PokemonList({
   pokemon,

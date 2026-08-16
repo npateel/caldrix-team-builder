@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import type { PokemonCardData } from "@/lib/pokemon-stats";
 import { usePokemonFilters } from "@/lib/use-pokemon-filters";
 import { useRosterDragReorder } from "@/lib/use-roster-drag-reorder";
 import type { RosterEntry } from "@/lib/team-roster";
-import type { PokemonCardData } from "./pokemon-card";
 import { PokemonFilterBar } from "./pokemon-filter-bar";
 import { PokemonGrid } from "./pokemon-grid";
 import { PokemonList } from "./pokemon-list";

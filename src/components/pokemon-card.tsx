@@ -1,19 +1,5 @@
-import type { TypeName } from "@/lib/type-chart";
 import { TYPE_COLORS } from "@/lib/type-colors";
-import { highestStatKeys, type StatKey } from "@/lib/pokemon-stats";
-
-export type PokemonCardData = {
-  id: number;
-  name: string;
-  spriteUrl: string | null;
-  types: TypeName[];
-  hp: number;
-  attack: number;
-  defense: number;
-  specialAttack: number;
-  specialDefense: number;
-  speed: number;
-};
+import { highestStatKeys, type PokemonCardData, type StatKey } from "@/lib/pokemon-stats";
 
 const STATS: { key: StatKey; label: string }[] = [
   { key: "hp", label: "HP" },

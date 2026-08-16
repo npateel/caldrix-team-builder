@@ -1,5 +1,31 @@
+import type { TypeName } from "./type-chart";
+
 export const STAT_KEYS = ["hp", "attack", "defense", "specialAttack", "specialDefense", "speed"] as const;
 export type StatKey = (typeof STAT_KEYS)[number];
+
+// The pokemon shape every browser view renders (grid cards, list rows,
+// roster slots). Lives here rather than next to one of those components so
+// the shared hooks/helpers below don't have to import from @/components.
+export type PokemonCardData = {
+  id: number;
+  name: string;
+  spriteUrl: string | null;
+  types: TypeName[];
+  hp: number;
+  attack: number;
+  defense: number;
+  specialAttack: number;
+  specialDefense: number;
+  speed: number;
+};
+
+export type StatSortKey = StatKey | "total";
+export type SortKey = "id" | "name" | StatSortKey;
+export type SortDirection = "asc" | "desc";
+
+export function statTotal(p: PokemonCardData): number {
+  return p.hp + p.attack + p.defense + p.specialAttack + p.specialDefense + p.speed;
+}
 
 // Stats within this many points of the max count as "tied for largest".
 const SIMILAR_THRESHOLD = 5;

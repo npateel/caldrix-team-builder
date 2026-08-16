@@ -2,7 +2,8 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useRef, useState } from "react";
-import { PokemonCard, type PokemonCardData } from "./pokemon-card";
+import type { PokemonCardData } from "@/lib/pokemon-stats";
+import { PokemonCard } from "./pokemon-card";
 import { FULL_TABLE_MAX_WIDTH } from "./pokemon-list";
 
 const MIN_CARD_WIDTH = 200;
