@@ -41,6 +41,7 @@ export function TeamDetail({
   allPokemon: PokemonCardData[];
 }) {
   const [tab, setTab] = useState<Tab>("team");
+  const [renamePending, setRenamePending] = useState(false);
 
   const [outerRef, containerWidth] = useContainerWidth();
   const isDesktop = containerWidth >= LAYOUT_BREAKPOINT;
@@ -71,7 +72,7 @@ export function TeamDetail({
       allPokemon={allPokemon}
       isDesktop={isDesktop}
       layout={rosterRowLayout}
-      pending={pending}
+      pending={pending || renamePending}
       selectedIds={selectedIds}
       onToggle={togglePokemon}
       onMove={movePokemon}
@@ -103,7 +104,7 @@ export function TeamDetail({
 
   return (
     <div ref={outerRef} className="flex min-h-0 flex-1 flex-col gap-4 p-4">
-      <TeamHeader teamId={team.id} teamName={team.name} />
+      <TeamHeader teamId={team.id} teamName={team.name} onPendingChange={setRenamePending} />
 
       {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
 

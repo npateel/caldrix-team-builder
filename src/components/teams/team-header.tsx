@@ -3,9 +3,18 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
-// Team name (inline rename) + delete, self-contained since neither mutation
-// touches roster state -- only `router.refresh()`/`router.push()`.
-export function TeamHeader({ teamId, teamName }: { teamId: string; teamName: string }) {
+// Team name (inline rename) + delete. Reports its own pending state up via
+// `onPendingChange` so a rename in flight also blocks roster edits, same as
+// when this and the roster shared a single `pending` flag pre-split.
+export function TeamHeader({
+  teamId,
+  teamName,
+  onPendingChange,
+}: {
+  teamId: string;
+  teamName: string;
+  onPendingChange?: (pending: boolean) => void;
+}) {
   const router = useRouter();
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameInput, setNameInput] = useState(teamName);
@@ -16,11 +25,13 @@ export function TeamHeader({ teamId, teamName }: { teamId: string; teamName: str
     const trimmed = nameInput.trim();
     if (!trimmed) return;
     setPending(true);
+    onPendingChange?.(true);
     const res = await fetch(`/api/teams/${teamId}`, {
       method: "PATCH",
       body: JSON.stringify({ name: trimmed }),
     });
     setPending(false);
+    onPendingChange?.(false);
     if (res.ok) {
       setIsRenaming(false);
       router.refresh();
