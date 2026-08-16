@@ -20,15 +20,15 @@ export function PokemonFilterBar({
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex items-center gap-3">
         <input
           type="search"
           placeholder="Search by name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full max-w-xs rounded border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-black"
+          className="min-w-0 max-w-lg flex-1 rounded border border-black/10 bg-white px-3 py-2 text-sm dark:border-white/10 dark:bg-black"
         />
-        <div className="ml-auto flex overflow-hidden rounded border border-black/10 text-sm dark:border-white/10">
+        <div className="ml-auto flex shrink-0 overflow-hidden rounded border border-black/10 text-sm dark:border-white/10">
           <button
             type="button"
             onClick={() => setView("grid")}

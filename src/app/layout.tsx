@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="h-full flex flex-col">
         <header className="sticky top-0 z-20 flex items-center justify-between gap-6 border-b border-black/10 bg-[var(--background)] px-4 py-3 dark:border-white/10">
-          <div className="flex items-baseline gap-6">
+          <div className="flex items-center gap-6">
             <Link href="/" className="text-base font-bold tracking-tight">
               Pokémon Team Builder
             </Link>
