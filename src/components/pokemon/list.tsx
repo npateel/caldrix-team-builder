@@ -2,9 +2,11 @@
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRef } from "react";
+import { activateProps } from "@/lib/activate-props";
 import { useContainerWidth } from "@/lib/use-container-width";
 import { TypeBadge } from "../type-badge";
 import {
+  HIGHEST_STAT_CLASSES,
   highestStatKeys,
   STAT_KEYS,
   statTotal,
@@ -113,19 +115,7 @@ export function PokemonList({
               return (
                 <div
                   key={p.id}
-                  role={onSelect ? "button" : undefined}
-                  tabIndex={onSelect ? 0 : undefined}
-                  onClick={onSelect ? () => onSelect(p.id) : undefined}
-                  onKeyDown={
-                    onSelect
-                      ? (e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            onSelect(p.id);
-                          }
-                        }
-                      : undefined
-                  }
+                  {...activateProps(onSelect ? () => onSelect(p.id) : undefined)}
                   className={`grid items-center gap-2 border-b border-black/5 text-sm dark:border-white/5 ${
                     onSelect ? "cursor-pointer hover:bg-black/5 dark:hover:bg-white/5" : ""
                   } ${selected ? "bg-emerald-50 dark:bg-emerald-950/30" : ""}`}
@@ -170,11 +160,7 @@ export function PokemonList({
                   {STAT_KEYS.map((key) => (
                     <span
                       key={key}
-                      className={`w-fit rounded px-1 ${
-                        boldStats.has(key)
-                          ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
-                          : ""
-                      }`}
+                      className={`w-fit rounded px-1 ${boldStats.has(key) ? HIGHEST_STAT_CLASSES : ""}`}
                     >
                       {p[key]}
                     </span>

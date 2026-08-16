@@ -3,11 +3,10 @@ import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { changes, moves, pokemon, pokemonMoves, teamPokemon } from "@/db/schema";
 import { fetchJson, pMap } from "@/lib/http";
-import { diffPokemon } from "@/lib/pokemon-diff";
-import { transformMove, transformPokemon, type FreshMove, type FreshPokemon } from "@/lib/pokeapi-transform";
+import { diffPokemon, toChangeRows } from "@/lib/pokemon-diff";
+import { POKEAPI_BASE, transformMove, transformPokemon, type FreshMove, type FreshPokemon } from "@/lib/pokeapi-transform";
 import { POKEMON_CACHE_TAG } from "@/server/pokemon-catalog";
 
-const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 const CONCURRENCY = 20;
 const BATCH_SIZE = 500;
 
@@ -46,13 +45,7 @@ export async function recordTeamPokemonChanges(freshRows: FreshPokemon[]): Promi
   const changeRows = relevantFresh.flatMap((fresh) => {
     const current = currentById.get(fresh.id);
     if (!current) return [];
-    return diffPokemon(current, fresh).map((diff) => ({
-      entityType: "pokemon" as const,
-      entityId: fresh.id,
-      field: diff.field,
-      oldValue: diff.oldValue,
-      newValue: diff.newValue,
-    }));
+    return toChangeRows(fresh.id, diffPokemon(current, fresh));
   });
   if (changeRows.length === 0) return 0;
 

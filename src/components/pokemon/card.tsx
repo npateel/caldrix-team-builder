@@ -1,4 +1,5 @@
-import { highestStatKeys, type PokemonCardData, type StatKey } from "@/lib/pokemon-stats";
+import { activateProps } from "@/lib/activate-props";
+import { HIGHEST_STAT_CLASSES, highestStatKeys, type PokemonCardData, type StatKey } from "@/lib/pokemon-stats";
 import { TypeBadge } from "../type-badge";
 
 const STATS: { key: StatKey; label: string }[] = [
@@ -23,19 +24,7 @@ export function PokemonCard({
 
   return (
     <div
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onClick={onClick}
-      onKeyDown={
-        onClick
-          ? (e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                onClick();
-              }
-            }
-          : undefined
-      }
+      {...activateProps(onClick)}
       className={`relative flex h-full w-full flex-col items-center gap-2 rounded-lg border p-3 text-left transition ${
         selected
           ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950/30"
@@ -82,9 +71,7 @@ export function PokemonCard({
             <dt className="uppercase">{label}</dt>
             <dd
               className={`rounded px-1 py-0.5 ${
-                boldStats.has(key)
-                  ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
-                  : "font-medium text-zinc-700 dark:text-zinc-300"
+                boldStats.has(key) ? HIGHEST_STAT_CLASSES : "font-medium text-zinc-700 dark:text-zinc-300"
               }`}
             >
               {pokemon[key]}

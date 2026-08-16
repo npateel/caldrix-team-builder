@@ -1,6 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { ActionButton } from "@/components/action-button";
+import { AdminTable, AdminTableHead, AdminTh, AdminTr } from "@/components/admin/table";
 import { db } from "@/db";
 import { changes, pokemon } from "@/db/schema";
 
@@ -49,28 +50,28 @@ export default async function AdminChangesPage() {
       {rows.length === 0 ? (
         <p className="text-sm text-zinc-500 dark:text-zinc-400">No changes detected yet.</p>
       ) : (
-        <table className="w-full max-w-3xl text-left text-sm">
-          <thead className="border-b border-black/10 text-xs text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+        <AdminTable className="max-w-3xl">
+          <AdminTableHead>
             <tr>
-              <th className="py-2 pr-4 font-medium">Detected</th>
-              <th className="py-2 pr-4 font-medium">Pokémon</th>
-              <th className="py-2 pr-4 font-medium">Field</th>
-              <th className="py-2 pr-4 font-medium">Old</th>
-              <th className="py-2 pr-4 font-medium">New</th>
+              <AdminTh>Detected</AdminTh>
+              <AdminTh>Pokémon</AdminTh>
+              <AdminTh>Field</AdminTh>
+              <AdminTh>Old</AdminTh>
+              <AdminTh>New</AdminTh>
             </tr>
-          </thead>
+          </AdminTableHead>
           <tbody>
             {rows.map(({ change, pokemonName }) => (
-              <tr key={change.id} className="border-b border-black/5 dark:border-white/5">
+              <AdminTr key={change.id}>
                 <td className="py-1.5 pr-4">{change.detectedAt.toLocaleString()}</td>
                 <td className="py-1.5 pr-4 capitalize">{pokemonName ?? `#${change.entityId}`}</td>
                 <td className="py-1.5 pr-4">{change.field}</td>
                 <td className="py-1.5 pr-4 text-zinc-500 dark:text-zinc-400">{change.oldValue}</td>
                 <td className="py-1.5 pr-4 font-medium">{change.newValue}</td>
-              </tr>
+              </AdminTr>
             ))}
           </tbody>
-        </table>
+        </AdminTable>
       )}
     </div>
   );

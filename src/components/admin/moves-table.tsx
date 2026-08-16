@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { TypeName } from "@/lib/type-chart";
+import { AdminTable, AdminTableHead, AdminTh, AdminTr } from "./table";
 import { TypeBadge } from "../type-badge";
 
 export type MoveRow = {
@@ -34,19 +35,19 @@ export function AdminMovesTable({ moves }: { moves: MoveRow[] }) {
         {filtered.length} of {moves.length} moves
       </p>
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full max-w-3xl text-left text-sm">
-          <thead className="border-b border-black/10 text-xs text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+        <AdminTable className="max-w-3xl">
+          <AdminTableHead>
             <tr>
-              <th className="py-2 pr-4 font-medium">Name</th>
-              <th className="py-2 pr-4 font-medium">Type</th>
-              <th className="py-2 pr-4 font-medium">Class</th>
-              <th className="py-2 pr-4 font-medium">Power</th>
-              <th className="py-2 pr-4 font-medium">Last fetched</th>
+              <AdminTh>Name</AdminTh>
+              <AdminTh>Type</AdminTh>
+              <AdminTh>Class</AdminTh>
+              <AdminTh>Power</AdminTh>
+              <AdminTh>Last fetched</AdminTh>
             </tr>
-          </thead>
+          </AdminTableHead>
           <tbody>
             {filtered.map((move) => (
-              <tr key={move.id} className="border-b border-black/5 dark:border-white/5">
+              <AdminTr key={move.id}>
                 <td className="py-1.5 pr-4 capitalize">{move.name}</td>
                 <td className="py-1.5 pr-4">
                   <TypeBadge type={move.type} />
@@ -54,10 +55,10 @@ export function AdminMovesTable({ moves }: { moves: MoveRow[] }) {
                 <td className="py-1.5 pr-4 capitalize">{move.damageClass}</td>
                 <td className="py-1.5 pr-4">{move.power ?? "—"}</td>
                 <td className="py-1.5 pr-4">{move.lastFetchedAt.toLocaleDateString()}</td>
-              </tr>
+              </AdminTr>
             ))}
           </tbody>
-        </table>
+        </AdminTable>
       </div>
     </div>
   );

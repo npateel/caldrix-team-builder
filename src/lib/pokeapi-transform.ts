@@ -1,6 +1,8 @@
 import { moves, pokemon } from "@/db/schema";
 import type { TypeName } from "./type-chart";
 
+export const POKEAPI_BASE = "https://pokeapi.co/api/v2";
+
 export type FreshPokemon = Omit<typeof pokemon.$inferSelect, "lastFetchedAt">;
 export type FreshMove = Omit<typeof moves.$inferSelect, "lastFetchedAt">;
 

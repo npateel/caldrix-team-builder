@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { highestStatKeys, STAT_KEYS, statTotal, type PokemonCardData } from "@/lib/pokemon-stats";
+import { HIGHEST_STAT_CLASSES, highestStatKeys, STAT_KEYS, statTotal, type PokemonCardData } from "@/lib/pokemon-stats";
 import { TypeBadge } from "../type-badge";
 
 export type RosterRowLayout = "narrow" | "phone" | "desktop";
@@ -39,9 +39,7 @@ function RosterStats({ pokemon, gap }: { pokemon: PokemonCardData; gap: string }
           <span className="text-[8px] uppercase text-zinc-400">{STAT_LABELS[i]}</span>
           <span
             className={`inline-block w-6 rounded py-0.5 text-center text-[10px] tabular-nums ${
-              boldStats.has(key)
-                ? "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300"
-                : "font-medium text-zinc-700 dark:text-zinc-300"
+              boldStats.has(key) ? HIGHEST_STAT_CLASSES : "font-medium text-zinc-700 dark:text-zinc-300"
             }`}
           >
             {pokemon[key]}

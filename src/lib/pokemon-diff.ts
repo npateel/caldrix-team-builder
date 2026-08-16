@@ -16,6 +16,14 @@ const SCALAR_FIELDS = [
 
 export type FieldDiff = { field: string; oldValue: string; newValue: string };
 
+export type PokemonChangeRow = { entityType: "pokemon"; entityId: number } & FieldDiff;
+
+// Shared by both jobs' `changes` inserts (reseed.ts, scan-changes.ts) so the
+// row shape can't drift between them.
+export function toChangeRows(entityId: number, diffs: FieldDiff[]): PokemonChangeRow[] {
+  return diffs.map((diff) => ({ entityType: "pokemon" as const, entityId, ...diff }));
+}
+
 // Shared by both jobs that can discover a pokemon changed -- scan-changes.ts
 // (team-scoped, live per-id fetches) and reseed.ts (whole-cache, already has
 // fresh data in hand) -- so "what counts as a change" can't drift between
