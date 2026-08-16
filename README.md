@@ -22,6 +22,20 @@ However, I do quite like it for a few reasons — some of the main ones:
    it for flexibility. Seeing how much Tailwind CSS ended up in the final product,
    I regret this a little.
 
+## Frontend design
+
+- Tried to keep to minimal friction and few API calls.
+  - Caches the API call to grab all Pokémon (preferred since it's relatively little data).
+  - A DB scan or change can invalidate the cache.
+- Wanted to implement a debounce + optimistic UI for team roster management, but it ended up
+  being too much code to review at once.
+- Wanted the grids to model what matters to competitive/Smogon Pokémon players.
+- Added auth so that certain endpoints could be gated.
+- The sprites aren't a consistent size the way the official artwork is. I kept this since
+  scaling them looked pretty bad — if you want a consistent look, use the official artwork
+  instead.
+- Would be nice to add a stat bar chart to spot a lopsided team (e.g. only SpAtk, no SpDef).
+
 ## Data model
 
 - `pokemon`/`moves` are cached into the Neon database so that we're not hitting APIs
@@ -66,9 +80,7 @@ We're not addressing moves for now (ran out of time), but we could by:
 2. Countering specific move types (Rapid Spin for hazards, countering weather teams).
 3. Guessing a Pokémon's role and answering the corresponding threat (sweeper, tank, etc.).
 
-
-
-## Task 2 -- change detection & alerts
+## Task 2 — change detection & alerts
 
 A scan job refetches team Pokémon on a schedule and logs field-level
 diffs. A popup display shows changes to the signed-in user's own team
@@ -101,13 +113,14 @@ through the same alert path.
     automatically clears the alert.
 - OAuth is optional; anonymous users get persistent teams via cookie,
   re-pointed onto the account on sign-in.
-- Admin access is granted by hand (flip a DB column) -- fine for a
+- Admin access is granted by hand (flip a DB column) — fine for a
   handful of admins on a take-home.
 
 ## With more time
 
 - Weighted/exhaustive search for counter-team selection.
-- More meta-aware counter-team selection
-- Consideration of Pokemon moves and abilities
+- More meta-aware counter-team selection.
+- Consideration of Pokémon moves and abilities.
 - Self-serve admin promotion flow.
-- Faster-than-daily scan trigger for quicker demo feedback. (Not possible without paid tiers of vercel)
+- Faster-than-daily scan trigger for quicker demo feedback (not possible without a paid
+  Vercel tier).
