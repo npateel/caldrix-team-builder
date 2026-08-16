@@ -1,80 +1,111 @@
-# Pokémon Team Builder
+# Design Decisions & Assumptions
 
-## Setup
+## Stack
 
-- `npm install`
-- `npm run db:migrate` -- apply the schema to your Neon database
-- `npm run seed:fetch` -- builds the raw PokéAPI cache at
-  `scripts/data/*.jsonl` (~190MB, gitignored -- it's derived data, so it's
-  regenerated rather than checked in). Required once on a fresh clone, and
-  it takes a few minutes. Safe to interrupt and rerun; ids already cached
-  are skipped, so rerunning later just picks up new PokéAPI data
-- `npm run db:seed` -- reads that cache and upserts it into the database
-- `npm run dev` -- start the Next.js dev server
-- `npm test` -- run the route/unit tests (Vitest; DB and auth are mocked, no
-  live database needed)
+Next.js on Vercel, Neon serverless Postgres + Drizzle, Auth.js v5
+(GitHub/Google, JWT sessions). Optimized for time-to-deploy over scale
+given the take-home's ~72h lifespan. Some badness here include:
 
-## OAuth (GitHub + Google)
+1. The database is technically on the public internet, not great for security
+2. Serverless will run into limitations if we start doing more complex calculations / crons
+   (thankfully, we can pull most of the pokemon within a minute, but long-lived cron jobs
+   don't play nice with the serverless time limits)
+3. The whole next.js + vercel + neon + drizzle + authjs is so templatized at this point it
+   it signals as AI genrated. Especially with the lucide symbols and the tailwindcss
 
-Requires these vars in `.env.local` (see adr-005):
 
-- `AUTH_SECRET` -- any random string, e.g. `openssl rand -base64 33`
-- `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` -- from a GitHub OAuth App
-  ([github.com/settings/developers](https://github.com/settings/developers)).
-  Authorization callback URL: `http://localhost:3000/api/auth/callback/github`
-  (and your deployed URL's equivalent)
-- `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` -- from a Google OAuth Client
-  ([console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials)).
-  Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
-  (and your deployed URL's equivalent)
+However, I do quite like it for a few reasons -- some of the main ones:
+1. No thought is required for CI/CD. This is the big one for me, I just really
+   dislike having to think about pipelines and just having an easy deploy works.
+   I just wished it worked for tests (need to integrate github actions for that, which
+   I didn't want to implement)
+2. I considered using a react components library (MUI / Blueprint.js), but decided against that 
+   for flexibility. Seeing how much tailwind css is used in the final product, 
+   I regret this a little bit
 
-## Admin portal (`/admin`)
 
-Gated by `users.isAdmin` (see adr-006) -- there's no self-serve way to
-become an admin. To grant yourself access: sign in once via OAuth so your
-`users` row exists, then flip the column by hand, e.g. via `npm run
-db:studio` or:
 
-```sql
-update users set is_admin = true where email = 'you@example.com';
-```
 
-The "Admin" link only shows up in the nav once your account has it.
+## Data model
 
-### Task 2 change-detection scan
+- `pokemon`/`moves` are cached into the Neon database so that we're not hitting APIs
+  directly (both as a respect for the devs + easier sorting / querying)
 
-`/admin/changes` shows the `changes` log and a "Run scan now" button that
-hits `/api/cron/scan-changes` -- the same route Vercel Cron calls on the
-schedule in `vercel.json` (hourly). Only pokemon currently on at least one
-team are checked against live PokéAPI data (see adr-006 for why).
+- `teams`/ `team_pokemon` track rosters with a `position` column for order-aware
+add/remove/reorder. 
 
-- `CRON_SECRET` -- any random string, set in your Vercel project's env vars.
-  Vercel Cron sends it as `Authorization: Bearer $CRON_SECRET`; not needed
-  locally since the admin "Run scan now" button authenticates via your
-  admin session instead.
+- Users start as an anonymous cookie-assigned row, and then can sign in and migrate
+  their teams automatically
 
-Signed-in users see a small warning icon next to any of their teams that
-had a pokemon change in the last 7 days on `/` -- click it for an old-vs-
-new detail dialog (see adr-008). Since real PokéAPI data rarely changes
-day to day, `/admin/changes` also has a "Simulate a change (demo)" button
-that desyncs one of your own team pokemon's cached stat from its live
-value -- click it, then "Run scan now" (the real, unmodified scan job),
-then check `/` for the resulting alert.
+## Counter-team algorithm
 
-### Daily full cache reseed
+Found in (`src/lib/counter-team.ts`). The current approach uses a greedy algorithm
+to match up the ideal counter for each individual pokemon under a team-wide constraint
+of having a well-balanced defensive team. 
 
-`/api/cron/reseed` refetches the *entire* pokemon/moves cache from PokéAPI
-(not just team pokemon like the scan job above) and upserts it -- see
-adr-007. Vercel Cron runs it daily at 3am (`vercel.json`); `/admin/pokemon`
-also has a "Reseed cache now" button for triggering it manually. Same
-`CRON_SECRET`/admin-session auth as the scan route. It also logs to
-`changes` for whichever pokemon it refetches that happen to be on a team
-(see adr-008's update) -- so either this or "Run scan now" will pick up
-the demo change above; a real change no longer goes undetected just
-because reseed happened to run before the next scan.
+The ideal counter is one that can:
+- Wall an offensive pokemon (so high def if high atk, high SpDef if high SpAtk),
+- Can attack against glass cannons (so high atk if low def, high SpAtk if low SpDef),
+- Is faster 
+- Has a type advantage
+- Has high overall stats
 
-This does ~2200 PokéAPI calls and realistically takes a minute or more, so
-`export const maxDuration = 300` is set on the route -- **this needs a
-Vercel plan whose function duration ceiling actually covers that** (Hobby's
-default won't). If it times out in practice, see adr-007's alternatives
-(a scheduled CI job has no such limit).
+The greedy algorithm is pretty simple -- here's an example:
+
+1. I choose Arceus (Normal). The algorithm choose the worst possible counter Marshadow (Fighting / Ghost)
+2. If I continue to choose normal types, we'll see Zamazenta (Fighting / Steel), Calyrex-Shadow (Psychic / Ghost),
+   then Eternatus-Eternamax (Poison / Dragon) Notice how we're not spamming just fighting or just ghost types, we're
+   trying to build a decent defensive team while being a menace to the pokemon already chosen
+3. We're largely trying to assume that a users Pokemon will be attacking with the same types as the Pokemon's types to get
+  a Same-Type-Attack-Bonus (STAB). In practice, this doesn't always happen, so the counter could get surprised by some unusual movesets
+  (e.g. a water type that can learn ice beam can seriously ruin a dragon type's day)
+
+
+
+I tried doing a beam search w/ pruning (similar to how NLP models predict the next word), but this seemed to produce bad results. 
+Wonder if it would have been worth retrying with different weights
+
+We're not addressing moves for now (ran out of time), but we could do that by
+1. Checking out some of the most used movesets on Pikalytics, and countering those
+2. Counter against specific move types (Rapid spin for spikes / hazards, Counter weather teams)
+3. Guessing the role of a pokemon and answering threats based on that (Counter the sweep, tank, etc.)
+
+
+
+## Task 2 -- change detection & alerts
+
+A scan job refetches team Pokémon on a schedule and logs field-level
+diffs. A popup display shows changes to the signed-in user's own team
+Pokémon from the last 7 days, netted into one before/after pair per field
+so round-trip changes don't falsely alert.
+
+The alert clears when the team is modified. I wasn't sure whether to persist until dismissed or not,
+but thought that less friction here is better
+
+**To demo**: real PokéAPI data rarely changes day-to-day, so
+`/admin/changes` has a "Simulate a change" button that writes a fake diff
+through the same alert path.
+
+## Assumptions
+
+- Team size capped at 6, order-aware.
+- A Pokemon team must have unique pokemon
+  - This follows both tournament and Smogon rules. 
+  - The project /currently/ allows for someone to put two of the same pokemon, different variants on the same team.
+    This can be fixed by integrating with pokeapi.co/api/v2/pokedex/1/ and doing some joins off that data, but I ran out of time
+- An optimal counter team has good stats and good type advantages (defending and attacking)
+- A "change" alert requires the diff to be within 7 days *and* after the
+  Pokémon was added to that roster, so another team's already-seen change
+  can't surface as stale/new on a roster built later.
+  - We do this to handle a case like a typo + fix, or multiple changes in a week. Either way, the net is what's important
+  - Users can clear their change alert when they open and modify a stale team. This will automatically clear the alert
+- OAuth is optional; anonymous users get persistent teams via cookie,
+  re-pointed onto the account on sign-in.
+- Admin access is granted by hand (flip a DB column) -- fine for a
+  handful of admins on a take-home.
+
+## With more time
+
+- Weighted/exhaustive search for counter-team selection.
+- Self-serve admin promotion flow.
+- Faster-than-daily scan trigger for quicker demo feedback. (Not possible without paid tiers of vercel)
