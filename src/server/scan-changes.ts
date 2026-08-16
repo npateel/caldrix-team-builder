@@ -2,12 +2,10 @@ import { eq, inArray } from "drizzle-orm";
 import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { changes, pokemon } from "@/db/schema";
-import { diffPokemon, type FieldDiff } from "@/lib/pokemon-diff";
-import { transformPokemon } from "@/lib/pokeapi-transform";
+import { diffPokemon, toChangeRows, type FieldDiff } from "@/lib/pokemon-diff";
+import { POKEAPI_BASE, transformPokemon } from "@/lib/pokeapi-transform";
 import { POKEMON_CACHE_TAG } from "@/server/pokemon-catalog";
 import { getTeamPokemonIds } from "@/server/team-roster";
-
-const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 
 export type ScanResult = {
   checked: number;
@@ -42,15 +40,7 @@ export async function scanForChanges(): Promise<ScanResult> {
     result.changed++;
     result.changes.push(...diffs.map((diff) => ({ pokemonId: id, name: fresh.name, ...diff })));
 
-    await db.insert(changes).values(
-      diffs.map((diff) => ({
-        entityType: "pokemon" as const,
-        entityId: id,
-        field: diff.field,
-        oldValue: diff.oldValue,
-        newValue: diff.newValue,
-      })),
-    );
+    await db.insert(changes).values(toChangeRows(id, diffs));
     await db
       .update(pokemon)
       .set({ ...fresh, lastFetchedAt: new Date() })

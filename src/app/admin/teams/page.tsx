@@ -1,5 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { ActionButton } from "@/components/action-button";
+import { AdminTable, AdminTableHead, AdminTh, AdminTr } from "@/components/admin/table";
 import { db } from "@/db";
 import { teams, users } from "@/db/schema";
 import { getRosters } from "@/server/team-roster";
@@ -16,19 +17,19 @@ export default async function AdminTeamsPage() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold">Teams ({allTeams.length})</h1>
-      <table className="w-full max-w-4xl text-left text-sm">
-        <thead className="border-b border-black/10 text-xs text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+      <AdminTable className="max-w-4xl">
+        <AdminTableHead>
           <tr>
-            <th className="py-2 pr-4 font-medium">Name</th>
-            <th className="py-2 pr-4 font-medium">Owner</th>
-            <th className="py-2 pr-4 font-medium">Roster</th>
-            <th className="py-2 pr-4 font-medium">Updated</th>
+            <AdminTh>Name</AdminTh>
+            <AdminTh>Owner</AdminTh>
+            <AdminTh>Roster</AdminTh>
+            <AdminTh>Updated</AdminTh>
             <th className="py-2" />
           </tr>
-        </thead>
+        </AdminTableHead>
         <tbody>
           {allTeams.map(({ team, ownerEmail, ownerName }) => (
-            <tr key={team.id} className="border-b border-black/5 dark:border-white/5">
+            <AdminTr key={team.id}>
               <td className="py-2 pr-4">{team.name}</td>
               <td className="py-2 pr-4">{ownerEmail ?? ownerName ?? "anonymous"}</td>
               <td className="py-2 pr-4">{(rosters.get(team.id) ?? []).length} / 6</td>
@@ -43,10 +44,10 @@ export default async function AdminTeamsPage() {
                   variant="link"
                 />
               </td>
-            </tr>
+            </AdminTr>
           ))}
         </tbody>
-      </table>
+      </AdminTable>
     </div>
   );
 }

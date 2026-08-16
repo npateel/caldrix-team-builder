@@ -27,6 +27,11 @@ export function statTotal(p: PokemonCardData): number {
   return p.hp + p.attack + p.defense + p.specialAttack + p.specialDefense + p.speed;
 }
 
+// Shared styling for a stat value called out by highestStatKeys, so the
+// grid card, list row, and roster row stay in sync.
+export const HIGHEST_STAT_CLASSES =
+  "bg-emerald-100 font-bold text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-300";
+
 // Stats within this many points of the max count as "tied for largest".
 const SIMILAR_THRESHOLD = 5;
 
