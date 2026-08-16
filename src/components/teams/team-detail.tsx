@@ -138,6 +138,9 @@ export function TeamDetail({
             {tab === "pokedex" ? (
               <div className="flex min-h-0 flex-1 flex-col gap-3">
                 <PokemonFilterBar {...filters} filteredCount={filters.filtered.length} totalCount={allPokemon.length} />
+                <p className="text-xs text-black/60 dark:text-white/60">
+                  Tap a Pokémon to add it to your team, tap again to remove it.
+                </p>
                 {pokedexPanel}
               </div>
             ) : null}
