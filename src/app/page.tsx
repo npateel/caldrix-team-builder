@@ -66,7 +66,13 @@ export default async function Home() {
                     </p>
                   </div>
                   {roster.length > 0 ? (
-                    <div className="mr-8 flex flex-wrap items-center gap-2">
+                    // mr-14 (56px) plus this Link's own p-3 (12px) clears the
+                    // absolutely-positioned Delete button in the card's
+                    // top-right corner: right-2 (8px) + its wrapper's px-1.5
+                    // padding (12px) + "Delete" at text-xs Geist, measured at
+                    // ~36px, = 56px from the card's edge. Recalculate if the
+                    // label, font size, or wrapper padding ever change.
+                    <div className="mr-14 flex flex-wrap items-center gap-2">
                       {roster.map((entry) =>
                         entry.pokemon.spriteUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
