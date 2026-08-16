@@ -14,27 +14,53 @@ so there's no way to trigger a genuine detected change on demand.
 
 - `src/server/team-changes.ts`: `getRecentTeamChanges(userId)` joins
   `changes` -> `pokemon` -> `team_pokemon` -> `teams`, filtered to the
-  given user's own teams and `detectedAt` within the last 7 days. One row
-  per (change, team) pair -- if the same pokemon sits on two of a user's
-  teams, both get their own alert, since the change is independently
-  relevant to each.
+  given user's own teams and `detectedAt` within the last 7 days, grouped
+  by team (mirrors `getRosters`' `Map<teamId, ...>` shape). One row per
+  (change, team) pair before grouping -- if the same pokemon sits on two
+  of a user's teams, both get their own alert.
 - `src/components/teams/team-change-badge.tsx`: a small warning icon next
   to each team's name on the home page (`/`), shown only for teams with
-  recent changes, with a hover/focus tooltip listing what changed (see the
-  UI update below for why this replaced an earlier banner design). No
-  read/dismissed state -- `changes` has nowhere to track that per-user, and
-  the 7-day window already rolls entries off on its own.
+  recent changes. Hovering shows a short "click for details" prompt;
+  clicking opens a `<dialog>` with the actual detail -- one old/new table
+  per changed pokemon, old on the left and new on the right. Nested inside
+  the team card's own link, so the trigger is a `role="button"` span (a
+  real `<button>` nested inside an `<a>` behaves badly) with
+  `stopPropagation`/`preventDefault` so clicking it opens the dialog
+  instead of navigating the card, plus its own keydown handling since a
+  non-native button doesn't get Enter/Space activation for free. No
+  read/dismissed state -- `changes` has nowhere to track that per-user,
+  and the 7-day window already rolls entries off on its own. No separate
+  mobile handling needed: touch has no hover, so the prompt just never
+  appears there and a tap goes straight to the click handler -- the
+  natural touch equivalent of "hover, then click."
+- `src/lib/consolidate-team-changes.ts`: collapses every change to a given
+  pokemon's field within the 7-day window into one net before/after pair
+  (earliest recorded old value vs. latest new value), rather than showing
+  one row per detected diff. A field that round-trips back to its
+  starting value within the window (e.g. attack 87 -> 80 -> 87) nets to no
+  real change and is dropped entirely; a pokemon left with no surviving
+  fields is dropped too.
 - Demo mechanism (`src/server/simulate-change.ts`, wired to a new
   admin-only `/api/admin/simulate-change` route and a "Simulate a change
   (demo)" button on `/admin/changes`): deliberately bumps one of the
   admin's own team pokemon's cached `attack` stat by 5, desyncing it from
-  the live PokéAPI value. Running the existing "Run scan now" afterward
-  then does its normal, completely unmodified job -- fetches live data,
-  finds the (now genuine) discrepancy between cache and source, logs it to
-  `changes`, and writes the cache back to the true value. The detection
-  and alerting code path being exercised is 100% production code; only the
-  starting discrepancy is artificial. Scoped to the admin's own teams so
-  the resulting alert shows up on their own home page immediately.
+  the live PokéAPI value. Running the existing "Run scan now" (or "Reseed
+  cache now" -- see the update below) afterward then does its normal,
+  completely unmodified job -- fetches live data, finds the (now genuine)
+  discrepancy between cache and source, logs it to `changes`, and writes
+  the cache back to the true value. The detection and alerting code path
+  being exercised is 100% production code; only the starting discrepancy
+  is artificial. Scoped to the admin's own teams so the resulting alert
+  shows up on their own home page immediately.
+
+Design iteration: the alert UI went through two earlier shapes before
+this one -- first a single banner at the top of `/` listing every team's
+changes at once (didn't scale once several teams had several changes
+each, and a pokemon with 3 changed stats read as 3 separate lines), then
+a per-team icon whose hover tooltip listed the same one-line-per-field
+detail (readable for one or two fields, but a tooltip is the wrong place
+for a growing list, and doesn't leave room for the old/new comparison
+this settled on).
 
 ## Update: reseed was silently erasing undetected changes
 
@@ -55,25 +81,6 @@ team-pokemon scope as scan-changes.ts (adr-006), reusing the fresh data
 reseed already fetched rather than making its own PokéAPI calls. Both jobs
 now agree: whichever one happens to run first catches the change.
 
-## Update: banner didn't scale, replaced with per-team warning badges
-
-The first version was a single banner at the top of `/` listing every
-changed pokemon across every team, one line per changed field. Two
-problems in practice: it doesn't scale -- once several teams each have
-several changes, the banner dominates the page above the team list it's
-supposed to be annotating -- and a pokemon with 3 changed stats produced 3
-separate lines instead of reading as one event.
-
-Replaced with `TeamChangeBadge`: a small `TriangleAlert` icon next to each
-team's name, shown only when that team has recent changes, sized to not
-disrupt the layout regardless of how many teams have alerts. Hovering (or
-focusing, for keyboard/touch users) reveals a tooltip with the details,
-scoped to just that team. `src/lib/group-team-changes.ts` collapses
-multiple field-diff rows for the same pokemon from the same scan/reseed
-run (same `detectedAt`, since a single multi-row `INSERT` gets one
-`now()`) into one line -- "bulbasaur: attack 49→55, hp 45→50" instead of
-two. Pure CSS tooltip (`group-hover`/`group-focus-visible`), no client JS.
-
 ## Alternatives
 
 1. Insert a fabricated row directly into `changes` for the demo, instead
@@ -92,3 +99,9 @@ two. Pure CSS tooltip (`group-hover`/`group-focus-visible`), no client JS.
    requirement that only asks for the alert to *show up*, not to be
    dismissible. The 7-day window already bounds how long a stale alert
    lingers.
+4. Show every individual detected diff rather than netting per-field
+   changes down to one before/after pair. More literal (matches
+   `/admin/changes`' log exactly), but for a user-facing alert the net
+   effect -- "this is different from what you last saw" -- is what
+   actually matters, and showing a value that round-tripped back to
+   itself as a "change" would be actively misleading.

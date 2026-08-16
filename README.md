@@ -54,12 +54,12 @@ team are checked against live PokéAPI data (see adr-006 for why).
   admin session instead.
 
 Signed-in users see a small warning icon next to any of their teams that
-had a pokemon change in the last 7 days on `/` -- hover (or focus) it for
-details (see adr-008). Since real PokéAPI data rarely changes day to day,
-`/admin/changes` also has a "Simulate a change (demo)" button that
-desyncs one of your own team pokemon's cached stat from its live value --
-click it, then "Run scan now" (the real, unmodified scan job), then check
-`/` for the resulting alert.
+had a pokemon change in the last 7 days on `/` -- click it for an old-vs-
+new detail dialog (see adr-008). Since real PokéAPI data rarely changes
+day to day, `/admin/changes` also has a "Simulate a change (demo)" button
+that desyncs one of your own team pokemon's cached stat from its live
+value -- click it, then "Run scan now" (the real, unmodified scan job),
+then check `/` for the resulting alert.
 
 ### Daily full cache reseed
 
