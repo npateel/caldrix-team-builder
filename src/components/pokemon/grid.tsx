@@ -1,8 +1,8 @@
 "use client";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef, useState } from "react";
 import type { PokemonCardData } from "@/lib/pokemon-stats";
+import { useContainerWidth } from "@/lib/use-container-width";
 import { PokemonCard } from "./card";
 import { FULL_TABLE_MAX_WIDTH } from "./list";
 
@@ -23,19 +23,10 @@ export function PokemonGrid({
   onSelect?: (id: number) => void;
   selectedIds?: Set<number>;
 }) {
-  const [columnCount, setColumnCount] = useState(1);
-  const parentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = parentRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => {
-      const width = entry.contentRect.width;
-      setColumnCount(Math.max(1, Math.floor((width + GAP) / (MIN_CARD_WIDTH + GAP))));
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const [parentRef, containerWidth] = useContainerWidth();
+  // Derived rather than stored: at containerWidth 0 (pre-measure) this is 1,
+  // matching the old initial state.
+  const columnCount = Math.max(1, Math.floor((containerWidth + GAP) / (MIN_CARD_WIDTH + GAP)));
 
   const rowCount = Math.ceil(pokemon.length / columnCount);
   const rowVirtualizer = useVirtualizer({

@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { PokemonCardData } from "@/lib/pokemon-stats";
+import { useContainerWidth } from "@/lib/use-container-width";
 import { usePokemonFilters } from "@/lib/use-pokemon-filters";
 import { useRosterDragReorder } from "@/lib/use-roster-drag-reorder";
 import type { RosterEntry } from "@/server/team-roster";
@@ -48,15 +49,7 @@ export function TeamDetail({
   const [tab, setTab] = useState<Tab>("pokedex");
   const [quickAddQuery, setQuickAddQuery] = useState("");
 
-  const outerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  useEffect(() => {
-    const el = outerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const [outerRef, containerWidth] = useContainerWidth();
   const isDesktop = containerWidth >= LAYOUT_BREAKPOINT;
   const rosterRowLayout: RosterRowLayout = isDesktop
     ? "desktop"

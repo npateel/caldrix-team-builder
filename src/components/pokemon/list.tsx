@@ -1,8 +1,9 @@
 "use client";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { TYPE_COLORS } from "@/lib/type-colors";
+import { useContainerWidth } from "@/lib/use-container-width";
 import {
   highestStatKeys,
   STAT_KEYS,
@@ -49,17 +50,8 @@ export function PokemonList({
   onSelect?: (id: number) => void;
   selectedIds?: Set<number>;
 }) {
-  const outerRef = useRef<HTMLDivElement>(null);
+  const [outerRef, containerWidth] = useContainerWidth();
   const parentRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-
-  useEffect(() => {
-    const el = outerRef.current;
-    if (!el) return;
-    const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width));
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   const layout: "full" | "compact" = containerWidth >= LAYOUT_BREAKPOINT ? "full" : "compact";
   const template = layout === "full" ? FULL_TEMPLATE : COMPACT_TEMPLATE;
