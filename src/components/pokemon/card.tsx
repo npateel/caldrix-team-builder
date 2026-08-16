@@ -36,11 +36,17 @@ export function PokemonCard({
             }
           : undefined
       }
-      className={`relative flex h-full w-full flex-col items-center gap-2 rounded-lg border p-3 text-left ${
+      className={`relative flex h-full w-full flex-col items-center gap-2 rounded-lg border p-3 text-left transition ${
         selected
           ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-950/30"
           : "border-black/10 bg-white dark:border-white/10 dark:bg-zinc-900"
-      } ${onClick ? "cursor-pointer hover:border-black/30 dark:hover:border-white/30" : ""}`}
+      } ${
+        onClick
+          ? selected
+            ? "cursor-pointer"
+            : "cursor-pointer hover:border-violet-300 hover:shadow-md hover:shadow-violet-500/10 dark:hover:border-violet-800 dark:hover:shadow-violet-400/10"
+          : ""
+      }`}
     >
       {selected ? (
         <span className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs text-white">

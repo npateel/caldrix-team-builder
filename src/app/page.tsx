@@ -54,7 +54,7 @@ export default async function Home() {
                 </div>
                 <Link
                   href={`/teams/${team.id}`}
-                  className="flex flex-col gap-3 rounded border border-black/10 p-3 hover:bg-black/5 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:bg-white/5"
+                  className="flex flex-col gap-3 rounded border border-black/10 p-3 transition hover:border-violet-300 hover:shadow-md hover:shadow-violet-500/10 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 dark:hover:border-violet-800 dark:hover:shadow-violet-400/10"
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 font-medium">
