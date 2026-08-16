@@ -1,8 +1,8 @@
 import { desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { auth } from "@/auth";
+import { ActionButton } from "@/components/action-button";
 import { SignInButtons } from "@/components/auth-nav";
-import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { CreateTeamButton } from "@/components/create-team-button";
 import { db } from "@/db";
 import { teams } from "@/db/schema";
@@ -46,9 +46,13 @@ export default async function Home() {
             return (
               <li key={team.id} className="relative">
                 <div className="absolute right-2 top-2 z-10 rounded bg-white/90 px-1.5 py-1 shadow-sm dark:bg-zinc-900/90">
-                  <ConfirmDeleteButton
+                  <ActionButton
                     url={`/api/teams/${team.id}`}
+                    method="DELETE"
+                    label="Delete"
+                    pendingLabel="Deleting…"
                     confirmMessage={`Delete "${team.name}"? This can't be undone.`}
+                    variant="link"
                   />
                 </div>
                 <Link
