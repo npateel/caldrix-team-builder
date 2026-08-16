@@ -1,8 +1,10 @@
 import { sql } from "drizzle-orm";
+import { revalidateTag } from "next/cache";
 import { db } from "@/db";
 import { moves, pokemon, pokemonMoves } from "@/db/schema";
 import { fetchJson, pMap } from "@/lib/http";
 import { transformMove, transformPokemon, type FreshMove } from "@/lib/pokeapi-transform";
+import { POKEMON_CACHE_TAG } from "@/server/pokemon-catalog";
 
 const POKEAPI_BASE = "https://pokeapi.co/api/v2";
 const CONCURRENCY = 20;
@@ -102,6 +104,8 @@ export async function reseed(): Promise<ReseedResult> {
   for (const batch of chunk(linkRows, BATCH_SIZE)) {
     await db.insert(pokemonMoves).values(batch).onConflictDoNothing();
   }
+
+  revalidateTag(POKEMON_CACHE_TAG, { expire: 0 });
 
   return { pokemon: pokemonRows.length, moves: moveRows.length, pokemonMoveLinks: linkRows.length };
 }

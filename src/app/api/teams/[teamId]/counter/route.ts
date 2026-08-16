@@ -1,8 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { pokemon, teams } from "@/db/schema";
+import { teams } from "@/db/schema";
 import { generateCounterTeam } from "@/lib/counter-team";
+import { getAllPokemon } from "@/server/pokemon-catalog";
 import { getRoster } from "@/server/team-roster";
 import { getOrCreateUserId } from "@/server/user";
 
@@ -26,7 +27,7 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
   // Whole cached pokemon table as the candidate pool -- fine at this scale
   // (~1300 rows), reconsider if that ever changes.
-  const candidatePool = await db.select().from(pokemon);
+  const candidatePool = await getAllPokemon();
   const counterTeam = generateCounterTeam(roster, candidatePool);
 
   return NextResponse.json({ teamId, counterTeam });

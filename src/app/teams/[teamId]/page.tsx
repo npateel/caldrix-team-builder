@@ -1,9 +1,10 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { TeamDetail } from "@/components/teams/team-detail";
 import { db } from "@/db";
-import { pokemon, teams } from "@/db/schema";
+import { teams } from "@/db/schema";
+import { getAllPokemon } from "@/server/pokemon-catalog";
 import { getRoster } from "@/server/team-roster";
 
 type Params = { params: Promise<{ teamId: string }> };
@@ -20,10 +21,7 @@ export default async function TeamDetailPage({ params }: Params) {
     .limit(1);
   if (!team) notFound();
 
-  const [roster, allPokemon] = await Promise.all([
-    getRoster(teamId),
-    db.select().from(pokemon).orderBy(asc(pokemon.id)),
-  ]);
+  const [roster, allPokemon] = await Promise.all([getRoster(teamId), getAllPokemon()]);
 
   return <TeamDetail team={team} roster={roster} allPokemon={allPokemon} />;
 }
