@@ -1,5 +1,32 @@
 # Pokémon Team Builder
 
+## Directory structure
+
+```
+├── documentation/adr/    Architecture decision records (adr-001..008)
+├── drizzle/               Generated SQL migrations (drizzle-kit)
+├── scripts/
+│   ├── fetch.ts           Builds the raw PokéAPI cache (npm run seed:fetch)
+│   └── seed.ts            Upserts that cache into the database (npm run db:seed)
+├── src/
+│   ├── app/                Next.js App Router routes
+│   │   ├── admin/          Admin portal pages (changes, moves, pokemon, teams, users)
+│   │   ├── api/            Route handlers (admin, auth, cron, teams)
+│   │   ├── pokedex/        Pokémon browsing grid
+│   │   └── teams/[teamId]/ Team roster + counter-team pages
+│   ├── components/         React components (admin, pokemon, teams)
+│   ├── db/                 Drizzle client + schema (schema.ts); __mocks__ for tests
+│   ├── lib/                 Framework-agnostic logic: counter-team algorithm,
+│   │                        type chart, pokemon diff/stats, hooks, etc. — plus
+│   │                        their co-located *.test.ts files
+│   ├── server/              DB-backed server functions (teams, users, scans,
+│   │                        reseed); __mocks__ so route tests don't need a
+│   │                        live database
+│   └── types/               Shared TypeScript types
+├── vercel.json              Cron schedules (scan-changes hourly, reseed daily)
+└── vitest.config.ts
+```
+
 ## Setup
 
 - `npm install`
