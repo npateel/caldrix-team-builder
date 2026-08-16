@@ -18,7 +18,14 @@ import type { TeamChangeAlert } from "@/server/team-changes";
 // long as the pointer is over the icon OR any descendant (the popover
 // included) that can receive pointer events, regardless of the
 // popover's own position, so this "hover, then move onto the popover
-// itself" works without any JS.
+// itself" works without any JS -- as long as the two boxes actually
+// touch. There's no `ml-*`/gap between the icon and the popover for
+// exactly that reason: `:hover` has no grace period, so a real gap
+// between them is a dead zone where the pointer is over neither, and
+// the popover vanishes the instant it's crossed, before the mouse ever
+// reaches the link. The `px-2.5` on the popover still gives the text
+// its own visual breathing room from the icon, just as internal padding
+// instead of external margin.
 //
 // Both the icon and the inner link are nested inside the team card's own
 // `<Link>`, so both are `role="button"` spans (not real `<button>`s,
@@ -63,7 +70,7 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
         className="group/badge relative inline-flex shrink-0 cursor-pointer outline-none"
       >
         <TriangleAlert size={14} className="text-amber-600 dark:text-amber-400" />
-        <span className="absolute left-full top-1/2 z-20 ml-1.5 hidden w-56 -translate-y-1/2 flex-col gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-left text-xs normal-case text-amber-900 shadow-lg group-hover/badge:flex group-focus-visible/badge:flex dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+        <span className="absolute left-full top-1/2 z-20 hidden w-56 -translate-y-1/2 flex-col gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-2 text-left text-xs normal-case text-amber-900 shadow-lg group-hover/badge:flex group-focus-visible/badge:flex dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
           <span>Pokémon on your team have changed.</span>
           <span
             role="button"
