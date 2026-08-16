@@ -107,5 +107,7 @@ through the same alert path.
 ## With more time
 
 - Weighted/exhaustive search for counter-team selection.
+- More meta-aware counter-team selection
+- Consideration of Pokemon moves and abilities
 - Self-serve admin promotion flow.
 - Faster-than-daily scan trigger for quicker demo feedback. (Not possible without paid tiers of vercel)
