@@ -2,8 +2,24 @@
 
 import { TriangleAlert, X } from "lucide-react";
 import { useRef, type KeyboardEvent, type MouseEvent } from "react";
+import { TypeBadge } from "@/components/type-badge";
 import { consolidateTeamChanges } from "@/lib/consolidate-team-changes";
+import type { TypeName } from "@/lib/type-chart";
 import type { TeamChangeAlert } from "@/server/team-changes";
+
+// `types` diffs store their old/new value as a comma-joined type list
+// (see diffPokemon/simulateStatDrift) -- render those as the same colored
+// pills used everywhere else, instead of raw text.
+function ChangeValue({ field, value }: { field: string; value: string | null }) {
+  if (field !== "types" || value === null) return <>{value}</>;
+  return (
+    <span className="flex flex-wrap gap-1">
+      {value.split(",").map((type) => (
+        <TypeBadge key={type} type={type as TypeName} size="xs" />
+      ))}
+    </span>
+  );
+}
 
 // Task 2's per-team change alert: a warning icon whose hover popover (or,
 // on touch/keyboard, a direct tap/Enter) opens a centered dialog with the
@@ -112,8 +128,12 @@ export function TeamChangeBadge({ alerts }: { alerts: TeamChangeAlert[] }) {
                     {pokemon.fields.map((f) => (
                       <tr key={f.field} className="border-t border-black/5 dark:border-white/5">
                         <td className="py-1 pr-3 capitalize">{f.field}</td>
-                        <td className="py-1 pr-3 text-zinc-500 dark:text-zinc-400">{f.oldValue}</td>
-                        <td className="py-1 pr-3 font-medium">{f.newValue}</td>
+                        <td className="py-1 pr-3 text-zinc-500 dark:text-zinc-400">
+                          <ChangeValue field={f.field} value={f.oldValue} />
+                        </td>
+                        <td className="py-1 pr-3 font-medium">
+                          <ChangeValue field={f.field} value={f.newValue} />
+                        </td>
                         <td className="py-1 text-zinc-500 dark:text-zinc-400">{f.detectedAt.toLocaleDateString()}</td>
                       </tr>
                     ))}
