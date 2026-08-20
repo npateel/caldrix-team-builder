@@ -10,8 +10,8 @@ import type { TeamChangeAlert } from "@/server/team-changes";
 // `types` diffs store their old/new value as a comma-joined type list
 // (see diffPokemon/simulateStatDrift) -- render those as the same colored
 // pills used everywhere else, instead of raw text.
-function ChangeValue({ field, value }: { field: string; value: string }) {
-  if (field !== "types") return <>{value}</>;
+function ChangeValue({ field, value }: { field: string; value: string | null }) {
+  if (field !== "types" || value === null) return <>{value}</>;
   return (
     <span className="flex flex-wrap gap-1">
       {value.split(",").map((type) => (
