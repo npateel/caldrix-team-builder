@@ -9,16 +9,25 @@ import type { TeamChangeAlert } from "@/server/team-changes";
 
 // `types` diffs store their old/new value as a comma-joined type list
 // (see diffPokemon/simulateStatDrift) -- render those as the same colored
-// pills used everywhere else, instead of raw text.
+// pills used everywhere else, instead of raw text. `spriteUrl` diffs are a
+// raw image URL -- render a thumbnail instead, same <img> pattern as the
+// pokemon card (see its comment: external host, too low-volume to bother
+// configuring next/image remote patterns for).
 function ChangeValue({ field, value }: { field: string; value: string | null }) {
-  if (field !== "types" || value === null) return <>{value}</>;
-  return (
-    <span className="flex flex-wrap gap-1">
-      {value.split(",").map((type) => (
-        <TypeBadge key={type} type={type as TypeName} size="xs" />
-      ))}
-    </span>
-  );
+  if (field === "types" && value !== null) {
+    return (
+      <span className="flex flex-wrap gap-1">
+        {value.split(",").map((type) => (
+          <TypeBadge key={type} type={type as TypeName} size="xs" />
+        ))}
+      </span>
+    );
+  }
+  if (field === "spriteUrl" && value !== null) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={value} alt="" width={32} height={32} loading="lazy" />;
+  }
+  return <>{value}</>;
 }
 
 // Task 2's per-team change alert: a warning icon whose hover popover (or,
